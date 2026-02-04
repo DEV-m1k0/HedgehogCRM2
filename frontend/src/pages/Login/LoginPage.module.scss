@@ -1,0 +1,35 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.containerPanel {
+    display: flex;
+    border-radius: var(--container-border-radius);
+    width: 50vw;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.panel {
+    flex: 1;
+}
+
+.infoPanel {
+    color: white;
+    border-radius: var(--container-border-radius) 0 0 var(--container-border-radius);
+    background: linear-gradient(135deg, var(--primary), #01c8ff);
+}
+
+.formPanel {
+    border-radius: 0 var(--container-border-radius) var(--container-border-radius) 0;
+    background-color: white;
+}
+.formPanel h1 {
+    color: var(--text-dark);
+}
+.formPanel p {
+    color: var(--text-dark-mute);
+}
