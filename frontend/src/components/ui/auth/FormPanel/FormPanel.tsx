@@ -2,11 +2,12 @@ import React, { useState } from "react"
 import { Button } from "@components/common/Button/Button"
 import { Input } from "@components/common/Input/Input"
 import { CheckBoxInput } from "@components/common/Input/CheckBoxInput"
-import { faEnvelope, faLock, faSignInAlt } from "@fortawesome/free-solid-svg-icons"
+import { faSignInAlt } from "@fortawesome/free-solid-svg-icons"
 import styles from "./FormPanel.module.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Link } from "react-router-dom"
 import type { FormPanelProps } from "./FormPanel.types"
+
 
 export const FormPanel: React.FC<FormPanelProps> = ({
     link,
@@ -14,7 +15,10 @@ export const FormPanel: React.FC<FormPanelProps> = ({
     pText,
     fields,
     type,
-    buttonText
+    buttonText,
+    onChangeField,
+    onSubmitForm,
+    canSubmit=true
 }) => {
     const [checked, setChecked] = useState(false);
 
@@ -36,6 +40,7 @@ export const FormPanel: React.FC<FormPanelProps> = ({
                             label={field.label}
                             placeholder={field.placeholder}
                             required={field.required}
+                            onChangeField={onChangeField}
                             icon={field.icon}
                             />
                         ))}
@@ -58,6 +63,7 @@ export const FormPanel: React.FC<FormPanelProps> = ({
                                 id={field.id}
                                 label={field.label}
                                 placeholder={field.placeholder}
+                                onChangeField={onChangeField}
                                 required={field.required}
                                 icon={field.icon}
                                 />
@@ -69,10 +75,12 @@ export const FormPanel: React.FC<FormPanelProps> = ({
                             type={field.type}
                             name={field.name}
                             id={field.id}
+                            onChangeField={onChangeField}
                             label={field.label}
                             placeholder={field.placeholder}
                             required={field.required}
                             icon={field.icon}
+                            pattern={field.pattern}
                             />
                         ))}
                     </>
@@ -81,6 +89,8 @@ export const FormPanel: React.FC<FormPanelProps> = ({
                 text={buttonText}
                 icon={<FontAwesomeIcon icon={faSignInAlt} />}
                 className={styles.loginButton}
+                onClick={onSubmitForm}
+                disabled={!canSubmit}
                 />
             </form>
             <p className={styles.switchPage}>{link.pText} <Link to={link.pathname}>{link.linkText}</Link></p>

@@ -10,31 +10,34 @@ export const Input: React.FC<InputProps> = ({
   name,
   label,
   value,
-  onChange,
+  onChangeField,
   placeholder,
   required = false,
   disabled = false,
-  error,
   className = '',
-  icon
+  icon,
+  pattern
 }) => {
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className={styles.formGroup}>
       {label ? <label className={`${required ? styles.required : ''}`} htmlFor={name}>{label}</label> : null}
       <div>
-        <span className={styles.icon}>{icon ? icon : null}</span>
+        <span className={`${styles.icon}`}>{icon ? icon : null}</span>
         <input
             type={type === 'password' ? showPassword ? 'text' : 'password' : type}
             name={name}
             id={name}
             value={value}
-            onChange={(e) => onChange(name, e.target.value)}
+            pattern={pattern}
+            onChange={e => onChangeField(name, e.target.value)}
             placeholder={placeholder}
             required={required}
             disabled={disabled}
-            className={`${styles.formControl} ${error ? styles.invalid : ''} ${className}`}
+            className={`${styles.formControl} ${className}`}
+            title='Минимум 8 символов, буква и цифра'
+            formNoValidate={true}
         />
         {
             type === 'password' &&
@@ -47,7 +50,6 @@ export const Input: React.FC<InputProps> = ({
             </button>
         }
       </div>
-      {error ? <div className="invalid-feedback">{error}</div> : null}
     </div>
   )
 };

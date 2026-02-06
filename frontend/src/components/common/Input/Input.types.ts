@@ -3,13 +3,14 @@ export interface InputProps {
   name: string;
   label?: string;
   value: string | number;
-  onChange: (name: string, value: string | number) => void;
+  onChangeField: (name: string, value: string | number) => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
-  error?: string;
+  isValid?: boolean;
   className?: string;
   icon?: React.ReactNode
+  pattern?: string
 }
 
 export interface CheckBoxInputProps {

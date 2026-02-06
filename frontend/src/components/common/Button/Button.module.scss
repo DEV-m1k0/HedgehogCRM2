@@ -10,3 +10,8 @@
     cursor: pointer;
     padding: 10px 20px;
 }
+
+.button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}

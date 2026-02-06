@@ -27,7 +27,6 @@
 
     &:focus-within .icon {
         color: var(--primary);
-        // animation: icon-animation 0.3s ease-in-out;
     }
 }
 
@@ -56,24 +55,6 @@
     border: none;
 }
 
-@keyframes icon-animation {
-    0% {
-        transform: translate(-5%, -50%);
-    }
-    25% {
-        transform: translate(5%, -50%);
-    }
-    50% {
-        transform: translate(-5%, -50%);
-    }
-    75% {
-        transform: translate(5%, -50%);
-    }
-    100% {
-        transform: translate(-5%, -50%);
-    }
-}
-
 .formGroup .formControl {
     padding: 16px 20px 16px 45px;
     box-sizing: border-box;
@@ -88,6 +69,7 @@
     &:hover {
         border-color: var(--primary-mute);
     }
+
     &:focus {
         outline: none;
         border-color: var(--primary);

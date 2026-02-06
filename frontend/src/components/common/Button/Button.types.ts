@@ -5,4 +5,5 @@ export interface ButtonProps {
     className?: string
     icon?: React.ReactNode
     onClick?: () => void
+    disabled?: boolean
 }
