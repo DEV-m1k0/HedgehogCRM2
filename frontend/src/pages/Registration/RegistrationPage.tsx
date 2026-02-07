@@ -5,6 +5,7 @@ import { infoPanelListItems } from './resources/infoPanelListItems'
 import { fields } from './resources/formPanelListOfFields'
 import type { RegistrationFormData } from './Registration.types'
 import { useState } from 'react'
+import axios from 'axios'
 
 export const RegistrationPage = () => {
     const [formData, setFormData] = useState<RegistrationFormData>({
@@ -25,6 +26,8 @@ export const RegistrationPage = () => {
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        axios.post('http://127.0.0.1:8000/user/register', formData)
+        .then(res => console.log(res))
         console.log(formData)
     }
 

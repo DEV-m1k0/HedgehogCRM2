@@ -1,7 +1,3 @@
-# import sys, os
-
-# sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -107,9 +103,8 @@ def create_users():
                 second_name=user_data["second_name"],
                 patronymic=user_data["patronymic"],
                 income_per_hour=user_data["income_per_hour"],
-                role=roles[user_data["role_name"]],
+                role_id=roles[user_data["role_name"]].id,
                 is_accepted=user_data["is_accepted"],
-                created_at=datetime.now()
             )
             session.add(user)
             print(f"Создан пользователь: {user_data['email']} ({user_data['role_name']})")

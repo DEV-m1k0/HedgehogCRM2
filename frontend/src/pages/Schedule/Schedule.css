@@ -1,0 +1,37 @@
+/* .fc-button-group {
+    gap: 10px !important;
+} */
+
+.fc {
+    color: var(--text-dark) !important;
+}
+
+.fc-toolbar-chunk .fc-toolbar-title {
+    color: var(--primary);
+}
+
+.fc-button {
+    background: var(--primary) !important;
+    border: none !important;
+    transition: var(--transition);
+}
+
+.fc-button:focus {
+    box-shadow: none !important;
+}
+
+.fc-button-group .fc-button-active {
+    box-shadow: none !important;
+    transform: scale(1.1);
+    border: 1px solid var(--primary) !important;
+    background: white !important;
+    color: var(--primary) !important;
+}
+
+.fc-day-today {
+    background: var(--primary-gradient-mute) !important;
+}
+
+.fc-dayGridMonth-view .fc-day-today {
+    border-radius: 10px;
+}
