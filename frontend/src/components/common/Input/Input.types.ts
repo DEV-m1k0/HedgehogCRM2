@@ -1,5 +1,5 @@
 export interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number';
+  type?: 'text' | 'email' | 'password' | 'number' | 'date' | 'time';
   name: string;
   label?: string;
   value: string | number;

@@ -8,51 +8,104 @@ import { useState } from 'react';
 
 import "./Schedule.css"
 import ConfirmationModal from './Components/ConfirmationModal';
+import { Input } from '../../components/common/Input/Input';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendar, faClock, faPen } from '@fortawesome/free-solid-svg-icons';
+import type { EventClickArg } from '@fullcalendar/core/index.js';
 
 
 export const SchedulePage = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+    const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+
+    const [pendingEvent, setPendingEvent] = useState<BaseEvent | null>(null);
 
     const [events, setEvents] = useState<BaseEvent[]>([
-        {
-            id: Date.now().toString(),
-            title: 'Event 1',
-            start: '2026-02-07T10:00:00',
-            // end: '2026-02-07T12:00:00',
-            allDay: false,
-            color: 'var(--primary)'
-        }
+        // {
+        //     id: Date.now().toString(),
+        //     title: 'Event 1',
+        //     start: '2026-02-07T10:00:00',
+        //     end: '2026-02-09T12:00:00',
+        //     color: 'var(--primary)',
+        //     editable: true,
+        // }
     ])
 
-    const createEvent = () => {
-        console.log("create event")
-    }
-
     const handleOpenModal = () => {
-        setIsModalOpen(true)
+        setIsModalCreateOpen(true)
     }
 
     const handleDateClick = (info: DateClickArg) => {
         handleOpenModal()
 
         console.log(info)
+
         const newEvent = {
             id: Date.now().toString(),
             title: 'Event 1',
-            start: info.dateStr,
-            allDay: false,
-            color: 'var(--primary)'
+            start: info.dateStr.toString(),
+            end: info.dateStr.toString(),
+            // startTime: '00:00',
+            color: 'var(--primary)',
         }
 
-        setEvents([...events, newEvent])
+        setPendingEvent(newEvent)
+        setIsModalCreateOpen(true)
     }
 
+    const handleConfirmCreateEvent = () => {
+        if (pendingEvent) {
+            const end = pendingEvent.end ? new Date(pendingEvent.end) : new Date(pendingEvent.start)
+            end.setDate(end.getDate() + 1)
+            const eventToAdd = { ...pendingEvent, end: end.toISOString().split('T')[0] }
+            setEvents(prev => [...prev, eventToAdd])
+            setPendingEvent(null)
+        }
+        setIsModalCreateOpen(false)
+    }
+
+    const handleCancelCreateEvent = () => {
+        setPendingEvent(null)
+        setIsModalCreateOpen(false)
+    }
+
+    const handleCancelEditEvent = () => {
+        setPendingEvent(null)
+        setIsModalEditOpen(false)
+    }
+
+    const handleConfirmEditEvent = () => {
+        if (pendingEvent) {
+            setEvents(events.map(ev => ev.id === pendingEvent.id ? pendingEvent : ev))
+            setPendingEvent(null)
+        }
+        setIsModalEditOpen(false)
+    }
+
+    const handleOpenModalEdit = (event: BaseEvent) => {
+        setIsModalEditOpen(true)
+        setPendingEvent(event)
+    }
+
+    const handleEventClick = (info: EventClickArg) => {
+        console.log(info.event)
+        const event = events.find(ev => ev.id === info.event.id)
+        if (event) {
+            handleOpenModalEdit(event)
+        }
+        // console.log(info.event)
+    }
 
     return (
         <div className="">
             <FullCalendar
 
             dateClick={handleDateClick}
+            eventClick={handleEventClick}
+
+            editable={true}
+            selectable={true}
+            droppable={true}
 
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
 
@@ -77,7 +130,7 @@ export const SchedulePage = () => {
 
             events={events}
             eventDisplay="block"
-
+            
             allDayContent="Весь день"
 
             height="85vh"
@@ -89,10 +142,6 @@ export const SchedulePage = () => {
             // slotMinTime={'08:00:00'}
             // slotMaxTime={'21:00:00'}
             slotDuration={'00:30:00'}
-            
-            editable={true}
-            selectable={true}
-            droppable={true}
 
             displayEventTime={true}
             displayEventEnd={true}
@@ -113,15 +162,86 @@ export const SchedulePage = () => {
             />
 
             <ConfirmationModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onConfirm={() => true}
-                title="Создание нового элемента"
-                message="Вы уверены, что хотите создать новый элемент? Это действие нельзя будет отменить."
+                isOpen={isModalCreateOpen}
+                onClose={handleCancelCreateEvent}
+                onConfirm={handleConfirmCreateEvent}
+                title="Создание нового события"
                 confirmText="Создать"
                 cancelText="Отмена"
                 confirmVariant="primary"
                 size="md"
+                children={
+                    <>
+                        <Input
+                            name='eventTitle'
+                            value={pendingEvent?.title || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, title: String(value) } : null)}
+                            placeholder="Введите название события"
+                            label='Название события'
+                            type='text'
+                            icon={<FontAwesomeIcon icon={faPen}/>}
+                        />
+                        <Input
+                            name='eventStartDate'
+                            value={pendingEvent?.start.toString() || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, start: String(value) } : null)}
+                            placeholder="Введите дату начала события"
+                            label='Дата начала события'
+                            type='date'
+                            icon={<FontAwesomeIcon icon={faCalendar}/>}
+                        />
+                        <Input
+                            name='eventEndDate'
+                            value={pendingEvent?.end?.toString() || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, end: String(value) } : null)}
+                            placeholder="Введите дату окончания события"
+                            label='Дата окончания события'
+                            type='date'
+                            icon={<FontAwesomeIcon icon={faCalendar}/>}
+                        />
+                    </>
+                }
+            />
+            <ConfirmationModal
+                isOpen={isModalEditOpen}
+                onClose={handleCancelEditEvent}
+                onConfirm={handleConfirmEditEvent}
+                title="Редактирование события"
+                confirmText="Сохранить"
+                cancelText="Отмена"
+                confirmVariant="primary"
+                size="md"
+                children={
+                    <>
+                        <Input
+                            name='eventTitle'
+                            value={pendingEvent?.title || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, title: String(value) } : null)}
+                            placeholder="Введите название события"
+                            label='Название события'
+                            type='text'
+                            icon={<FontAwesomeIcon icon={faPen}/>}
+                        />
+                        <Input
+                            name='eventDate'
+                            value={pendingEvent?.start.toString() || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, start: String(value) } : null)}
+                            placeholder="Введите дату события"
+                            label='Дата события'
+                            type='date'
+                            icon={<FontAwesomeIcon icon={faCalendar}/>}
+                        />
+                        {/* <Input
+                            name='eventTime'
+                            value={pendingEvent?.startTime?.toString() || ''}
+                            onChangeField={(name, value) => setPendingEvent(prev => prev ? { ...prev, startTime: String(value) } : null)}
+                            placeholder="Введите время события"
+                            label='Время события'
+                            type='time'
+                            icon={<FontAwesomeIcon icon={faClock}/>}
+                        /> */}
+                    </>
+                }
             />
         </div>
     )

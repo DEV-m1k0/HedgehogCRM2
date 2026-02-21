@@ -3,9 +3,12 @@ import type { EventInput } from "@fullcalendar/core/index.js";
 export interface BaseEvent extends EventInput {
   id: string;
   title: string;
-  start: string;
-  end?: string;
-  allDay: boolean;
+  start: string | Date;
+  startTime?: string | Date | null;
+  end?: string | Date;
+  endTime?: string | Date;
+  allDay?: boolean;
+  editable?: boolean;
 }
 
 export interface ICustomEvent extends EventInput {

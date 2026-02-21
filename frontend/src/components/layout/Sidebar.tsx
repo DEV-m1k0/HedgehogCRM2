@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import styles from './styles/Sidebar.module.css';
 import type { MenuItem } from '../../types/layout.types';
+import type { UserType } from '../../types/User.types';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -22,6 +23,31 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
   const [isMobile, setIsMobile] = useState(false);
+  const [user, setUser] = useState<UserType>({
+    id: 0,
+    email: '',
+    first_name: '',
+    second_name: '',
+    patronymic: null,
+    income_per_hour: 0,
+    phone: null,
+    is_accepted: false,
+    created_at: new Date(),
+    role: {
+      id: 0,
+      name: "Преподаватель"
+    }
+  });
+
+  useEffect(() => {
+    const fetchStoredUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+    fetchStoredUser();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -177,8 +203,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <Users size={20} />
               </div>
               <div>
-                <p className={styles.userName}>John Doe</p>
-                <p className={styles.userEmail}>john@example.com</p>
+                <p className={styles.userName}>{user.second_name} {user.first_name}</p>
+                <p className={styles.userEmail}>{user.email}</p>
               </div>
             </div>
             

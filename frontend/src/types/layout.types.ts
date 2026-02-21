@@ -5,10 +5,3 @@ export type MenuItem = {
   path: string;
   submenu?: MenuItem[];
 };
-
-export type User = {
-  name: string;
-  email: string;
-  avatar?: string;
-  role: string;
-};

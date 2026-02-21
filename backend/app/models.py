@@ -7,6 +7,7 @@ import bcrypt
 class Base(DeclarativeBase):
     pass
 
+
 class Role(Base):
     __tablename__ = "roles"
 
@@ -58,6 +59,7 @@ class User(Base):
             "second_name": self.second_name,
             "patronymic": self.patronymic,
             "income_per_hour": self.income_per_hour,
+            "phone": self.phone,
             "role": self.role.to_dict(),
             "is_accepted": self.is_accepted,
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S")

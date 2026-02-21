@@ -1,7 +1,8 @@
 // components/layout/Header.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Search, User, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import styles from './styles/Header.module.css';
+import type { UserType } from '../../types/User.types';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -14,9 +15,35 @@ const Header: React.FC<HeaderProps> = ({
   isSidebarCollapsed,
   isMobileMenuOpen = false
 }) => {
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [user, setUser] = useState<UserType>({
+    id: 0,
+    email: '',
+    first_name: '',
+    second_name: '',
+    patronymic: null,
+    income_per_hour: 0,
+    phone: null,
+    is_accepted: false,
+    created_at: new Date(),
+    role: {
+      id: 0,
+      name: "Преподаватель"
+    }
+  });
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchStoredUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+
+    fetchStoredUser();
+  }, []);
+
+  useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1024);
     };
@@ -63,8 +90,8 @@ const Header: React.FC<HeaderProps> = ({
             <User size={24} />
           </div>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>John Doe</span>
-            <span className={styles.userRole}>Administrator</span>
+            <span className={styles.userName}>{user.second_name} {user.first_name}</span>
+            <span className={styles.userRole}>{user.role.name}</span>
           </div>
         </div>
       </div>
