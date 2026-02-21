@@ -1,8 +1,11 @@
-from sqlalchemy import Boolean, String, ForeignKey, Float, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+from __future__ import annotations
 
 from datetime import datetime
+
 import bcrypt
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
 
 class Base(DeclarativeBase):
     pass
@@ -12,64 +15,163 @@ class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
-    users: Mapped[list["User"]] = relationship("User", back_populates="role")
+    users: Mapped[list[User]] = relationship(back_populates="role")
 
-    def __repr__(self):
-        return f"Role(id={self.id!r}, name={self.name!r})"
-    
-    def to_dict(self):
-        return {"id": self.id, "name": self.name}
 
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String, unique=True)
-    password: Mapped[str] = mapped_column(String)
-    first_name: Mapped[str] = mapped_column(String)
-    second_name: Mapped[str] = mapped_column(String)
-    patronymic: Mapped[str] = mapped_column(String, nullable=True)
-    income_per_hour: Mapped[float] = mapped_column(Float)
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    phone: Mapped[str] = mapped_column(String, nullable=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    second_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    patronymic: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    income_per_hour: Mapped[float] = mapped_column(Float, default=0.0)
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
+    phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    is_accepted: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    is_accepted: Mapped[bool] = mapped_column(Boolean)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+    role: Mapped[Role] = relationship(back_populates="users")
+    assigned_tasks: Mapped[list[Task]] = relationship(
+        foreign_keys="Task.assignee_id",
+        back_populates="assignee",
+    )
+    created_tasks: Mapped[list[Task]] = relationship(
+        foreign_keys="Task.creator_id",
+        back_populates="creator",
+    )
+    groups_as_teacher: Mapped[list[StudyGroup]] = relationship(back_populates="teacher")
 
-    role: Mapped[Role] = relationship("Role", back_populates="users")
+    def set_password(self, password: str) -> None:
+        self.password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    def __init__(self, email, password, first_name, second_name, patronymic, phone=None, income_per_hour=0.0, role_id=4, is_accepted=False):
-        self.email = email
-        self.password = self.__hash_password(password)
-        self.first_name = first_name
-        self.second_name = second_name
-        self.patronymic = patronymic
-        self.income_per_hour = income_per_hour
-        self.role_id = role_id
-        self.is_accepted = is_accepted
-        self.phone = phone
+    def check_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            "first_name": self.first_name,
-            "second_name": self.second_name,
-            "patronymic": self.patronymic,
-            "income_per_hour": self.income_per_hour,
-            "phone": self.phone,
-            "role": self.role.to_dict(),
-            "is_accepted": self.is_accepted,
-            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        }
 
-    def __hash_password(self, password: str):
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    
-    def check_password(self, password: str):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+class Client(Base):
+    __tablename__ = "clients"
 
-    def __repr__(self):
-        return f"User(id={self.id!r}, email={self.email!r}, role={self.role!r})"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    second_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    patronymic: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    date_of_birth: Mapped[datetime | None] = mapped_column(Date, nullable=True)
+    parent_full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    parent_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    parent_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tags: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    deals: Mapped[list[Deal]] = relationship(back_populates="client")
+    tasks: Mapped[list[Task]] = relationship(back_populates="client")
+    groups: Mapped[list[StudyGroup]] = relationship(secondary="group_students", back_populates="students")
+    attendance: Mapped[list[Attendance]] = relationship(back_populates="student")
+
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    cost: Mapped[float] = mapped_column(Float, default=0.0)
+    lesson_cost: Mapped[float] = mapped_column(Float, default=0.0)
+    lesson_count: Mapped[int] = mapped_column(Integer, default=0)
+    module_count: Mapped[int] = mapped_column(Integer, default=2)
+
+    groups: Mapped[list[StudyGroup]] = relationship(back_populates="course")
+
+
+class StudyGroup(Base):
+    __tablename__ = "groups"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
+    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), nullable=False)
+    teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    schedule_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    audience: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    course: Mapped[Course] = relationship(back_populates="groups")
+    teacher: Mapped[User | None] = relationship(back_populates="groups_as_teacher")
+    students: Mapped[list[Client]] = relationship(secondary="group_students", back_populates="groups")
+    lessons: Mapped[list[Lesson]] = relationship(back_populates="group", cascade="all, delete-orphan")
+
+
+class GroupStudent(Base):
+    __tablename__ = "group_students"
+    __table_args__ = (UniqueConstraint("group_id", "client_id", name="uq_group_student"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False)
+    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=False)
+
+
+class Lesson(Base):
+    __tablename__ = "lessons"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False)
+    topic: Mapped[str] = mapped_column(String(255), nullable=False)
+    start_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    materials_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_conducted: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    group: Mapped[StudyGroup] = relationship(back_populates="lessons")
+    attendance: Mapped[list[Attendance]] = relationship(back_populates="lesson", cascade="all, delete-orphan")
+
+
+class Attendance(Base):
+    __tablename__ = "attendance"
+    __table_args__ = (UniqueConstraint("lesson_id", "client_id", name="uq_lesson_client"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), nullable=False)
+    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="present")
+    comment: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    lesson: Mapped[Lesson] = relationship(back_populates="attendance")
+    student: Mapped[Client] = relationship(back_populates="attendance")
+
+
+class Deal(Base):
+    __tablename__ = "deals"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=False)
+    manager_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    stage: Mapped[str] = mapped_column(String(50), default="Первичный контакт")
+    amount: Mapped[float] = mapped_column(Float, default=0.0)
+    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    client: Mapped[Client] = relationship(back_populates="deals")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assignee_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    creator_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    client_id: Mapped[int | None] = mapped_column(ForeignKey("clients.id"), nullable=True)
+    deal_id: Mapped[int | None] = mapped_column(ForeignKey("deals.id"), nullable=True)
+    priority: Mapped[str] = mapped_column(String(20), default="medium")
+    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    assignee: Mapped[User | None] = relationship(foreign_keys=[assignee_id], back_populates="assigned_tasks")
+    creator: Mapped[User | None] = relationship(foreign_keys=[creator_id], back_populates="created_tasks")
+    client: Mapped[Client | None] = relationship(back_populates="tasks")
