@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   Calendar,
@@ -13,10 +13,13 @@ import {
   X,
   FolderKanban,
   FileText,
+  ArchiveRestore,
+  Shield,
 } from 'lucide-react';
 import styles from './styles/Sidebar.module.css';
 import type { MenuItem } from '../../types/layout.types';
 import type { UserType } from '../../types/User.types';
+import { authApi } from '../../api/crm';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -41,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState<UserType>(emptyUser);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -67,9 +71,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
     }));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore transport errors on logout
+    } finally {
+      localStorage.removeItem('user');
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
+    }
   };
 
   const handleLinkClick = () => {
@@ -78,27 +89,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
     }
   };
 
-  const menuItems: MenuItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/' },
-    { id: 'clients', label: 'Clients', icon: <Users size={20} />, path: '/clients' },
-    { id: 'deals', label: 'Deals', icon: <FolderKanban size={20} />, path: '/deals' },
-    { id: 'tasks', label: 'Tasks', icon: <FileText size={20} />, path: '/tasks' },
-    { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
-    { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
-    {
-      id: 'messages',
-      label: 'Messages',
-      icon: <Mail size={20} />,
-      path: '/messages/inbox',
-      submenu: [
-        { id: 'inbox', label: 'Inbox', icon: <Mail size={16} />, path: '/messages/inbox' },
-        { id: 'sent', label: 'Sent', icon: <Mail size={16} />, path: '/messages/sent' },
-        { id: 'drafts', label: 'Drafts', icon: <Mail size={16} />, path: '/messages/drafts' },
-      ],
-    },
-    { id: 'account', label: 'Account', icon: <UserCircle2 size={20} />, path: '/account' },
-    { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
-  ];
+  const roleName = user.role?.name?.toLowerCase() ?? '';
+  const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
+  const isAdmin = roleName.includes('администратор') || roleName.includes('admin');
+  const isManager = roleName.includes('менеджер') || roleName.includes('manager');
+
+  const menuItems: MenuItem[] = useMemo(() => {
+    if (isTeacher) {
+      return [
+        { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
+        { id: 'my-students', label: 'Мои ученики', icon: <Users size={20} />, path: '/my-students' },
+        { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/' },
+        { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
+        { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+      ];
+    }
+
+    return [
+      { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/' },
+      { id: 'clients', label: 'Clients', icon: <Users size={20} />, path: '/clients' },
+      { id: 'deals', label: 'Deals', icon: <FolderKanban size={20} />, path: '/deals' },
+      { id: 'tasks', label: 'Tasks', icon: <FileText size={20} />, path: '/tasks' },
+      { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
+      ...(isAdmin || isManager ? [{ id: 'makeups', label: 'Отработки', icon: <Calendar size={20} />, path: '/makeups' }] : []),
+      { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
+      { id: 'archive', label: 'Archive', icon: <ArchiveRestore size={20} />, path: '/archive' },
+      ...(isAdmin ? [{ id: 'admin-activity', label: 'Admin Activity', icon: <Shield size={20} />, path: '/admin/activity' }] : []),
+      {
+        id: 'messages',
+        label: 'Messages',
+        icon: <Mail size={20} />,
+        path: '/messages/inbox',
+        submenu: [
+          { id: 'inbox', label: 'Inbox', icon: <Mail size={16} />, path: '/messages/inbox' },
+          { id: 'sent', label: 'Sent', icon: <Mail size={16} />, path: '/messages/sent' },
+          { id: 'drafts', label: 'Drafts', icon: <Mail size={16} />, path: '/messages/drafts' },
+        ],
+      },
+      { id: 'account', label: 'Account', icon: <UserCircle2 size={20} />, path: '/account' },
+      { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+    ];
+  }, [isTeacher, isAdmin]);
 
   return (
     <>
@@ -165,7 +196,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
 
         {!isCollapsed && (
           <div className={styles.sidebarFooter}>
-            <div className={styles.userCard}>
+            <button
+              type="button"
+              className={styles.userCard}
+              onClick={() => {
+                navigate('/account');
+                handleLinkClick();
+              }}
+            >
               <div className={styles.userAvatar}>
                 <Users size={20} />
               </div>
@@ -173,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
                 <p className={styles.userName}>{user.second_name} {user.first_name}</p>
                 <p className={styles.userEmail}>{user.email}</p>
               </div>
-            </div>
+            </button>
 
             <div className={styles.actionButtons}>
               <button className={styles.logOutButton} onClick={handleLogout}>

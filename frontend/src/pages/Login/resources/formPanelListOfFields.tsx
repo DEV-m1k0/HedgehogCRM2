@@ -11,6 +11,7 @@ export const fields: Omit<InputProps, 'value' | 'onChangeField'>[] = [
     placeholder: 'Введите электронную почту',
     required: true,
     icon: <FontAwesomeIcon icon={faEnvelope} />,
+    pattern: '^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$',
   },
   {
     type: 'password',
@@ -20,5 +21,6 @@ export const fields: Omit<InputProps, 'value' | 'onChangeField'>[] = [
     placeholder: 'Введите пароль',
     required: true,
     icon: <FontAwesomeIcon icon={faLock} />,
+    pattern: '^(?=.*[A-Za-z])(?=.*\\d).{8,}$',
   },
 ];

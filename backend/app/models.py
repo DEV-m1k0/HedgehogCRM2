@@ -45,6 +45,8 @@ class User(Base):
         back_populates="creator",
     )
     groups_as_teacher: Mapped[list[StudyGroup]] = relationship(back_populates="teacher")
+    sessions: Mapped[list[UserSession]] = relationship(back_populates="user")
+    audit_logs: Mapped[list[AuditLog]] = relationship(back_populates="user")
 
     def set_password(self, password: str) -> None:
         self.password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -66,6 +68,7 @@ class Client(Base):
     parent_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     tags: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     deals: Mapped[list[Deal]] = relationship(back_populates="client")
     tasks: Mapped[list[Task]] = relationship(back_populates="client")
@@ -82,6 +85,7 @@ class Course(Base):
     lesson_cost: Mapped[float] = mapped_column(Float, default=0.0)
     lesson_count: Mapped[int] = mapped_column(Integer, default=0)
     module_count: Mapped[int] = mapped_column(Integer, default=2)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     groups: Mapped[list[StudyGroup]] = relationship(back_populates="course")
 
@@ -95,6 +99,7 @@ class StudyGroup(Base):
     teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     schedule_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
     audience: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     course: Mapped[Course] = relationship(back_populates="groups")
     teacher: Mapped[User | None] = relationship(back_populates="groups_as_teacher")
@@ -122,6 +127,10 @@ class Lesson(Base):
     materials_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_conducted: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_recurring_weekly: Mapped[bool] = mapped_column(Boolean, default=False)
+    recurrence_group_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     group: Mapped[StudyGroup] = relationship(back_populates="lessons")
     attendance: Mapped[list[Attendance]] = relationship(back_populates="lesson", cascade="all, delete-orphan")
@@ -135,10 +144,19 @@ class Attendance(Base):
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), nullable=False)
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="present")
+    auto_marked_cancelled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     comment: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    hedgehogs: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    absent_marked_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    makeup_lesson_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    makeup_teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    makeup_comment: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    makeup_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     lesson: Mapped[Lesson] = relationship(back_populates="attendance")
     student: Mapped[Client] = relationship(back_populates="attendance")
+    absent_marked_by_user: Mapped[User | None] = relationship(foreign_keys=[absent_marked_by_user_id])
+    makeup_teacher: Mapped[User | None] = relationship(foreign_keys=[makeup_teacher_id])
 
 
 class Deal(Base):
@@ -153,6 +171,7 @@ class Deal(Base):
     status: Mapped[str] = mapped_column(String(30), default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     client: Mapped[Client] = relationship(back_populates="deals")
 
@@ -171,7 +190,47 @@ class Task(Base):
     deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     assignee: Mapped[User | None] = relationship(foreign_keys=[assignee_id], back_populates="assigned_tasks")
     creator: Mapped[User | None] = relationship(foreign_keys=[creator_id], back_populates="created_tasks")
     client: Mapped[Client | None] = relationship(back_populates="tasks")
+
+
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    refresh_token_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="sessions")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    action: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    method: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_reviewed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    user: Mapped[User | None] = relationship(back_populates="audit_logs")

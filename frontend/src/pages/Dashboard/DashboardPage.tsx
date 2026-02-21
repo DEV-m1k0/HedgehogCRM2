@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from '../shared/PageLayout.module.css';
 import { clientsApi, coursesApi, dealsApi, scheduleApi, tasksApi } from '../../api/crm';
+import type { User } from '../../types/crm.types';
 
 interface Stats {
   clients: number;
@@ -14,9 +15,21 @@ export const DashboardPage = () => {
   const [stats, setStats] = useState<Stats>({ clients: 0, courses: 0, deals: 0, tasks: 0, lessons: 0 });
 
   useEffect(() => {
+    const currentUser = (() => {
+      const raw = localStorage.getItem('user');
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw) as User;
+      } catch {
+        return null;
+      }
+    })();
+    const roleName = currentUser?.role?.name?.toLowerCase() ?? '';
+    const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
+
     const load = async () => {
-      const [clients, courses, deals, tasks, lessons] = await Promise.all([
-        clientsApi.list(),
+      const [clients, courses, deals, tasks, lessons] = await Promise.allSettled([
+        isTeacher ? clientsApi.myStudents() : clientsApi.list(),
         coursesApi.list(),
         dealsApi.list(),
         tasksApi.list(),
@@ -24,11 +37,11 @@ export const DashboardPage = () => {
       ]);
 
       setStats({
-        clients: clients.data.length,
-        courses: courses.data.length,
-        deals: deals.data.length,
-        tasks: tasks.data.length,
-        lessons: lessons.data.length,
+        clients: clients.status === 'fulfilled' ? clients.value.data.length : 0,
+        courses: courses.status === 'fulfilled' ? courses.value.data.length : 0,
+        deals: deals.status === 'fulfilled' ? deals.value.data.length : 0,
+        tasks: tasks.status === 'fulfilled' ? tasks.value.data.length : 0,
+        lessons: lessons.status === 'fulfilled' ? lessons.value.data.length : 0,
       });
     };
 

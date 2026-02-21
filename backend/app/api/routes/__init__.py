@@ -1,4 +1,6 @@
 __all__ = [
+    "admin",
+    "archive",
     "auth",
     "clients",
     "courses",

@@ -102,6 +102,10 @@
   gap: 20px;
 }
 
+.notificationsWrap {
+  position: relative;
+}
+
 .iconButton {
   position: relative;
   background: rgba(248, 250, 252, 0.8);
@@ -150,6 +154,9 @@
   background: rgba(248, 250, 252, 0.8);
   cursor: pointer;
   transition: all 0.3s ease;
+  border: none;
+  text-align: left;
+  font: inherit;
 }
 
 .userMenu:hover {
@@ -197,6 +204,90 @@
 
 .iconButton:hover .badge {
   animation: pulse 1s ease-in-out infinite;
+}
+
+.notificationsPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(380px, calc(100vw - 24px));
+  background: #fff;
+  border: 1px solid #dbe5f1;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+  z-index: 1300;
+}
+
+.notificationsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.linkButton {
+  border: none;
+  background: none;
+  color: #1264a3;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notificationsList {
+  max-height: 360px;
+  overflow: auto;
+  display: grid;
+}
+
+.notificationsEmpty {
+  margin: 0;
+  padding: 16px 14px;
+  color: #64748b;
+}
+
+.notificationItem {
+  border: none;
+  border-bottom: 1px solid #eef2f7;
+  background: #fff;
+  text-align: left;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.notificationItem:hover {
+  background: #f8fbff;
+}
+
+.notificationItem.unread {
+  background: #eef6ff;
+}
+
+.notificationTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.notificationTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.notificationTime {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.notificationText {
+  font-size: 12px;
+  color: #334155;
 }
 
 /* Адаптивность для Header */

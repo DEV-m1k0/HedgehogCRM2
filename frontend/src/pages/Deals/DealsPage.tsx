@@ -2,10 +2,12 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { clientsApi, dealsApi, metaApi } from '../../api/crm';
 import type { Client, Deal, User } from '../../types/crm.types';
 import styles from '../shared/PageLayout.module.css';
+import { useNotifications } from '../../components/feedback/Notifications';
 
 const STAGES = ['Первичный контакт', 'Пробный урок', 'Выбор курса', 'Оформление договора', 'Оплата', 'Учеба'];
 
 export const DealsPage = () => {
+  const { notify } = useNotifications();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -27,22 +29,51 @@ export const DealsPage = () => {
     if (!form.client_id) {
       return;
     }
+    if (!window.confirm('Создать новую сделку?')) {
+      return;
+    }
 
-    await dealsApi.create({
-      client_id: Number(form.client_id),
-      manager_id: form.manager_id ? Number(form.manager_id) : undefined,
-      amount: Number(form.amount),
-      stage: STAGES[0],
-    });
-    setForm({ client_id: '', manager_id: '', amount: 0 });
-    await load();
+    try {
+      const response = await dealsApi.create({
+        client_id: Number(form.client_id),
+        manager_id: form.manager_id ? Number(form.manager_id) : undefined,
+        amount: Number(form.amount),
+        stage: STAGES[0],
+      });
+      setForm({ client_id: '', manager_id: '', amount: 0 });
+      await load();
+      notify('success', 'Сделка создана', 'Сделка успешно добавлена в воронку.', { href: `/deals#deal-${response.data.id}` });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось создать сделку.');
+    }
   };
 
   const moveStage = async (deal: Deal) => {
     const currentIndex = STAGES.findIndex((stage) => stage === deal.stage);
     const nextIndex = currentIndex === -1 ? 0 : Math.min(currentIndex + 1, STAGES.length - 1);
-    await dealsApi.patch(deal.id, { stage: STAGES[nextIndex] });
-    await load();
+    if (!window.confirm(`Перевести сделку на этап "${STAGES[nextIndex]}"?`)) {
+      return;
+    }
+    try {
+      await dealsApi.patch(deal.id, { stage: STAGES[nextIndex] });
+      await load();
+      notify('info', 'Этап изменен', 'Сделка переведена на следующий этап.', { href: `/deals#deal-${deal.id}` });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось обновить этап сделки.');
+    }
+  };
+
+  const archiveDeal = async (dealId: number) => {
+    if (!window.confirm('Архивировать сделку?')) {
+      return;
+    }
+    try {
+      await dealsApi.remove(dealId);
+      await load();
+      notify('info', 'Сделка архивирована', 'Сделка перенесена в архив.', { href: '/archive' });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось архивировать сделку.');
+    }
   };
 
   return (
@@ -70,10 +101,13 @@ export const DealsPage = () => {
 
       <div className={styles.grid}>
         {deals.map((deal) => (
-          <article className={styles.card} key={deal.id}>
+          <article className={styles.card} key={deal.id} id={`deal-${deal.id}`}>
             <div className={styles.row}>
               <strong>Сделка #{deal.id}</strong>
-              <button className={styles.buttonSecondary} onClick={() => moveStage(deal)}>Следующий этап</button>
+              <div className={styles.row}>
+                <button className={styles.buttonSecondary} onClick={() => moveStage(deal)}>Следующий этап</button>
+                <button className={styles.buttonSecondary} onClick={() => archiveDeal(deal.id)}>Архив</button>
+              </div>
             </div>
             <p className={styles.muted}>Клиент ID: {deal.client_id}</p>
             <p className={styles.muted}>Этап: {deal.stage}</p>

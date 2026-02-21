@@ -1,0 +1,152 @@
+.page {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.header h1 {
+  margin: 0 0 4px;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.search {
+  width: 100%;
+  border: 1px solid #d6d9df;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  margin-bottom: 12px;
+}
+
+.sections {
+  display: grid;
+  gap: 16px;
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sectionHead h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.sectionHead span {
+  font-size: 13px;
+  color: #64748b;
+  background: #e8eef7;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid #dbe7f5;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fbff;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cardTop h3 {
+  margin: 0 0 4px;
+}
+
+.cardTop p {
+  margin: 0 0 2px;
+  color: #334155;
+}
+
+.cardTop small {
+  color: #64748b;
+}
+
+.linkBtn {
+  text-decoration: none;
+  background: #e8eef7;
+  color: #243240;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  height: fit-content;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.formGrid label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.formGrid input,
+.formGrid select {
+  border: 1px solid #d6d9df;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: inherit;
+}
+
+.checkboxLabel {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  padding-top: 22px;
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions button {
+  border: none;
+  border-radius: 8px;
+  background: #1264a3;
+  color: #fff;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.empty {
+  color: #64748b;
+}

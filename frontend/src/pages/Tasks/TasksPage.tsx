@@ -2,8 +2,10 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { tasksApi } from '../../api/crm';
 import type { Task } from '../../types/crm.types';
 import styles from '../shared/PageLayout.module.css';
+import { useNotifications } from '../../components/feedback/Notifications';
 
 export const TasksPage = () => {
+  const { notify } = useNotifications();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
 
@@ -18,15 +20,44 @@ export const TasksPage = () => {
 
   const createTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await tasksApi.create({ title, priority: 'medium' });
-    setTitle('');
-    await load();
+    if (!window.confirm('Создать задачу?')) {
+      return;
+    }
+    try {
+      const response = await tasksApi.create({ title, priority: 'medium' });
+      setTitle('');
+      await load();
+      notify('success', 'Задача создана', 'Новая задача добавлена.', { href: `/tasks#task-${response.data.id}` });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось создать задачу.');
+    }
   };
 
   const toggleStatus = async (task: Task) => {
     const next = task.status === 'done' ? 'open' : 'done';
-    await tasksApi.patch(task.id, { status: next });
-    await load();
+    if (!window.confirm('Изменить статус задачи?')) {
+      return;
+    }
+    try {
+      await tasksApi.patch(task.id, { status: next });
+      await load();
+      notify('info', 'Статус обновлен', 'Статус задачи успешно изменен.', { href: `/tasks#task-${task.id}` });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось обновить статус задачи.');
+    }
+  };
+
+  const archiveTask = async (taskId: number) => {
+    if (!window.confirm('Архивировать задачу?')) {
+      return;
+    }
+    try {
+      await tasksApi.remove(taskId);
+      await load();
+      notify('info', 'Задача архивирована', 'Задача перенесена в архив.', { href: '/archive' });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось архивировать задачу.');
+    }
   };
 
   return (
@@ -40,12 +71,17 @@ export const TasksPage = () => {
 
       <div className={styles.grid}>
         {tasks.map((task) => (
-          <article className={styles.card} key={task.id}>
+          <article className={styles.card} key={task.id} id={`task-${task.id}`}>
             <div className={styles.row}>
               <strong>{task.title}</strong>
-              <button className={styles.buttonSecondary} onClick={() => toggleStatus(task)}>
-                {task.status === 'done' ? 'Открыть' : 'Закрыть'}
-              </button>
+              <div className={styles.row}>
+                <button className={styles.buttonSecondary} onClick={() => toggleStatus(task)}>
+                  {task.status === 'done' ? 'Открыть' : 'Закрыть'}
+                </button>
+                <button className={styles.buttonSecondary} onClick={() => archiveTask(task.id)}>
+                  Архив
+                </button>
+              </div>
             </div>
             <p className={styles.muted}>Статус: {task.status}</p>
             <p className={styles.muted}>Приоритет: {task.priority}</p>

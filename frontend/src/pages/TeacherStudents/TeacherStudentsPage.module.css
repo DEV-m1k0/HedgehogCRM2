@@ -1,0 +1,109 @@
+.page {
+  background: radial-gradient(1200px 500px at 0% 0%, #eff6ff 0%, #ffffff 45%);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.header h1 {
+  margin: 0 0 4px;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.search {
+  width: 100%;
+  margin-top: 14px;
+  border: 1px solid #d6d9df;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.groupList {
+  margin-top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.groupCard {
+  border: 1px solid #dbe6f4;
+  border-radius: 12px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.groupHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.groupHead h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.groupHead span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.studentsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.studentCard {
+  border: 1px solid #e6edf7;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f8fbff;
+}
+
+.studentCard strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.studentCard p {
+  margin: 4px 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.linkBtn,
+.linkBtnSecondary {
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.linkBtn {
+  background: #1264a3;
+  color: #fff;
+}
+
+.linkBtnSecondary {
+  background: #e8eef7;
+  color: #243240;
+}
+
+.empty {
+  margin-top: 14px;
+  color: #64748b;
+}

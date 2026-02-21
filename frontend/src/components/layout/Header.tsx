@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Bell, Search, User, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import styles from './styles/Header.module.css';
 import type { UserType } from '../../types/User.types';
+import { useNotifications } from '../feedback/Notifications';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -23,8 +25,12 @@ const emptyUser: UserType = {
 };
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMobileMenuOpen = false }) => {
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [isMobile, setIsMobile] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [user, setUser] = useState<UserType>(emptyUser);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -44,6 +50,19 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    const onClickOutside = (event: MouseEvent) => {
+      if (!isNotificationsOpen) {
+        return;
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [isNotificationsOpen]);
+
   return (
     <header className={`${styles.header} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <div className={styles.leftSection}>
@@ -58,12 +77,69 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
       </div>
 
       <div className={styles.rightSection}>
-        <button className={styles.iconButton}>
-          <Bell size={20} />
-          <span className={styles.badge}>3</span>
-        </button>
+        <div className={styles.notificationsWrap} ref={notificationsRef}>
+          <button
+            className={styles.iconButton}
+            onClick={() => {
+              const nextOpen = !isNotificationsOpen;
+              setIsNotificationsOpen(nextOpen);
+              if (nextOpen) {
+                markAllAsRead();
+              }
+            }}
+            aria-label="Открыть уведомления"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
+          </button>
 
-        <div className={styles.userMenu}>
+          {isNotificationsOpen && (
+            <div className={styles.notificationsPanel}>
+              <div className={styles.notificationsHeader}>
+                <strong>Уведомления</strong>
+                <button type="button" className={styles.linkButton} onClick={markAllAsRead}>
+                  Прочитать все
+                </button>
+              </div>
+
+              <div className={styles.notificationsList}>
+                {notifications.length === 0 ? (
+                  <p className={styles.notificationsEmpty}>Пока уведомлений нет</p>
+                ) : (
+                  notifications.slice(0, 50).map((item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      className={`${styles.notificationItem} ${!item.read ? styles.unread : ''}`}
+                      onClick={() => {
+                        markAsRead(item.id);
+                        if (item.href) {
+                          navigate(item.href);
+                          setIsNotificationsOpen(false);
+                        }
+                      }}
+                    >
+                      <div className={styles.notificationTop}>
+                        <span className={styles.notificationTitle}>{item.title}</span>
+                        <span className={styles.notificationTime}>
+                          {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <span className={styles.notificationText}>{item.message}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className={styles.userMenu}
+          onClick={() => navigate('/account')}
+          aria-label="Открыть профиль"
+        >
           <div className={styles.avatar}>
             <User size={24} />
           </div>
@@ -71,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
             <span className={styles.userName}>{user.second_name} {user.first_name}</span>
             <span className={styles.userRole}>{user.role.name}</span>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   );

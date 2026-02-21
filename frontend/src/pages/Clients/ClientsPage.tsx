@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { clientsApi } from '../../api/crm';
 import type { Client } from '../../types/crm.types';
 import styles from '../shared/PageLayout.module.css';
+import { useNotifications } from '../../components/feedback/Notifications';
 
 export const ClientsPage = () => {
+  const { notify } = useNotifications();
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -27,19 +30,32 @@ export const ClientsPage = () => {
   const createClient = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+    if (!window.confirm('Создать нового клиента?')) {
+      return;
+    }
 
     try {
-      await clientsApi.create(form);
+      const response = await clientsApi.create(form);
       setForm({ first_name: '', second_name: '', patronymic: '', parent_full_name: '', parent_phone: '', parent_email: '' });
       await load();
+      notify('success', 'Клиент создан', 'Новый клиент успешно добавлен в систему.', { href: `/clients/${response.data.id}` });
     } catch (e: any) {
       setError(e?.response?.data?.detail ?? 'Ошибка создания клиента');
+      notify('error', 'Ошибка', 'Не удалось создать клиента.');
     }
   };
 
   const removeClient = async (id: number) => {
-    await clientsApi.remove(id);
-    await load();
+    if (!window.confirm('Архивировать этого клиента?')) {
+      return;
+    }
+    try {
+      await clientsApi.remove(id);
+      await load();
+      notify('info', 'Клиент архивирован', 'Клиент скрыт из активного списка и может быть восстановлен.', { href: '/archive' });
+    } catch {
+      notify('error', 'Ошибка', 'Не удалось архивировать клиента.');
+    }
   };
 
   return (
@@ -66,6 +82,7 @@ export const ClientsPage = () => {
             </div>
             <p className={styles.muted}>Родитель: {client.parent_full_name ?? 'не указан'}</p>
             <p className={styles.muted}>Контакт: {client.parent_phone ?? '-'} / {client.parent_email ?? '-'}</p>
+            <Link className={styles.muted} to={`/clients/${client.id}`}>Открыть карточку ученика</Link>
           </article>
         ))}
       </div>

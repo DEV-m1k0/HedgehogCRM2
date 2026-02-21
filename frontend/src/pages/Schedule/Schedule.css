@@ -1,6 +1,79 @@
-/* .fc-button-group {
-    gap: 10px !important;
-} */
+.schedule-page {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.schedule-left-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.schedule-controls {
+    display: grid;
+    gap: 6px;
+}
+
+.schedule-controls select {
+    border: 1px solid #d6d9df;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.schedule-controls input {
+    border: 1px solid #d6d9df;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 200px;
+}
+
+.schedule-create-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+}
+
+.schedule-legend {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+}
+
+.schedule-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-dark-mute);
+}
+
+.schedule-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+}
+
+.schedule-empty-state {
+    margin-top: 12px;
+    border: 1px dashed #d6d9df;
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--text-dark-mute);
+}
 
 .fc {
     color: var(--text-dark) !important;
@@ -34,4 +107,8 @@
 
 .fc-dayGridMonth-view .fc-day-today {
     border-radius: 10px;
+}
+
+.fc-event {
+    cursor: pointer;
 }
