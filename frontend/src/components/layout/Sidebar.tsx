@@ -99,37 +99,48 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
       return [
         { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
         { id: 'my-students', label: 'Мои ученики', icon: <Users size={20} />, path: '/my-students' },
-        { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/' },
-        { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+        { id: 'analytics', label: 'Аналитика', icon: <BarChart3 size={20} />, path: '/analytics' },
+        { id: 'settings', label: 'Настройки', icon: <Settings size={20} />, path: '/settings' },
+      ];
+    }
+
+    if (isManager) {
+      return [
+        { id: 'clients', label: 'Клиенты', icon: <Users size={20} />, path: '/clients' },
+        { id: 'deals', label: 'Сделки', icon: <FolderKanban size={20} />, path: '/deals' },
+        { id: 'tasks', label: 'Задачи', icon: <FileText size={20} />, path: '/tasks' },
+        { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
+        { id: 'analytics', label: 'Аналитика', icon: <BarChart3 size={20} />, path: '/analytics' },
+        { id: 'archive', label: 'Архив', icon: <ArchiveRestore size={20} />, path: '/archive' },
+        { id: 'account', label: 'Профиль', icon: <UserCircle2 size={20} />, path: '/account' },
+        { id: 'settings', label: 'Настройки', icon: <Settings size={20} />, path: '/settings' },
       ];
     }
 
     return [
-      { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, path: '/' },
-      { id: 'clients', label: 'Clients', icon: <Users size={20} />, path: '/clients' },
-      { id: 'deals', label: 'Deals', icon: <FolderKanban size={20} />, path: '/deals' },
-      { id: 'tasks', label: 'Tasks', icon: <FileText size={20} />, path: '/tasks' },
+      { id: 'dashboard', label: 'Дашборд', icon: <Home size={20} />, path: '/' },
+      { id: 'clients', label: 'Клиенты', icon: <Users size={20} />, path: '/clients' },
+      { id: 'deals', label: 'Сделки', icon: <FolderKanban size={20} />, path: '/deals' },
+      { id: 'tasks', label: 'Задачи', icon: <FileText size={20} />, path: '/tasks' },
       { id: 'calendar', label: 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
-      ...(isAdmin || isManager ? [{ id: 'makeups', label: 'Отработки', icon: <Calendar size={20} />, path: '/makeups' }] : []),
-      { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} />, path: '/analytics' },
-      { id: 'archive', label: 'Archive', icon: <ArchiveRestore size={20} />, path: '/archive' },
-      ...(isAdmin ? [{ id: 'admin-activity', label: 'Admin Activity', icon: <Shield size={20} />, path: '/admin/activity' }] : []),
+      { id: 'analytics', label: 'Аналитика', icon: <BarChart3 size={20} />, path: '/analytics' },
+      { id: 'archive', label: 'Архив', icon: <ArchiveRestore size={20} />, path: '/archive' },
+      ...(isAdmin ? [{ id: 'admin-activity', label: 'Активность админа', icon: <Shield size={20} />, path: '/admin/activity' }] : []),
       {
         id: 'messages',
-        label: 'Messages',
+        label: 'Сообщения',
         icon: <Mail size={20} />,
         path: '/messages/inbox',
         submenu: [
-          { id: 'inbox', label: 'Inbox', icon: <Mail size={16} />, path: '/messages/inbox' },
-          { id: 'sent', label: 'Sent', icon: <Mail size={16} />, path: '/messages/sent' },
-          { id: 'drafts', label: 'Drafts', icon: <Mail size={16} />, path: '/messages/drafts' },
+          { id: 'inbox', label: 'Входящие', icon: <Mail size={16} />, path: '/messages/inbox' },
+          { id: 'sent', label: 'Отправленные', icon: <Mail size={16} />, path: '/messages/sent' },
+          { id: 'drafts', label: 'Черновики', icon: <Mail size={16} />, path: '/messages/drafts' },
         ],
       },
-      { id: 'account', label: 'Account', icon: <UserCircle2 size={20} />, path: '/account' },
-      { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+      { id: 'account', label: 'Профиль', icon: <UserCircle2 size={20} />, path: '/account' },
+      { id: 'settings', label: 'Настройки', icon: <Settings size={20} />, path: '/settings' },
     ];
-  }, [isTeacher, isAdmin]);
+  }, [isTeacher, isAdmin, isManager]);
 
   return (
     <>
@@ -216,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
             <div className={styles.actionButtons}>
               <button className={styles.logOutButton} onClick={handleLogout}>
                 <LogOut size={18} />
-                <span className={styles.label}>Logout</span>
+                <span className={styles.label}>Выйти</span>
               </button>
             </div>
           </div>

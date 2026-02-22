@@ -23,6 +23,8 @@ export const TeacherStudentsPage = () => {
 
   const [groups, setGroups] = useState<TeacherGroupStudents[]>([]);
   const [query, setQuery] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState<number | 'all'>('all');
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const response = await clientsApi.myStudentsGrouped();
@@ -30,13 +32,29 @@ export const TeacherStudentsPage = () => {
   };
 
   useEffect(() => {
-    load().catch(() => notify('error', 'Ошибка', 'Не удалось загрузить учеников преподавателя.'));
+    load()
+      .catch(() => notify('error', 'Ошибка', 'Не удалось загрузить учеников преподавателя.'))
+      .finally(() => setLoading(false));
   }, []);
+
+  const groupOptions = useMemo(
+    () => groups.map((group) => ({ id: group.group_id, name: group.group_name })),
+    [groups],
+  );
+
+  const totalStudents = useMemo(
+    () => groups.reduce((sum, group) => sum + group.students.length, 0),
+    [groups],
+  );
 
   const filteredGroups = useMemo(() => {
     const term = query.trim().toLowerCase();
-    if (!term) return groups;
-    return groups
+    const baseGroups = selectedGroupId === 'all'
+      ? groups
+      : groups.filter((group) => group.group_id === selectedGroupId);
+
+    if (!term) return baseGroups;
+    return baseGroups
       .map((group) => ({
         ...group,
         students: group.students.filter((student) => {
@@ -46,7 +64,12 @@ export const TeacherStudentsPage = () => {
         }),
       }))
       .filter((group) => group.students.length > 0);
-  }, [groups, query]);
+  }, [groups, query, selectedGroupId]);
+
+  const filteredStudentsCount = useMemo(
+    () => filteredGroups.reduce((sum, group) => sum + group.students.length, 0),
+    [filteredGroups],
+  );
 
   if (!isTeacher) return <Navigate to="/" replace />;
 
@@ -55,38 +78,78 @@ export const TeacherStudentsPage = () => {
       <header className={styles.header}>
         <div>
           <h1>Мои ученики</h1>
-          <p>Список учеников сгруппирован по вашим учебным группам.</p>
+          <p>Список учеников сгруппирован по вашим учебным группам, с быстрым доступом к карточкам.</p>
         </div>
       </header>
 
-      <input
-        className={styles.search}
-        placeholder="Поиск: ФИО, родитель, телефон, email"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <div className={styles.statsGrid}>
+        <article className={styles.statCard}>
+          <span>Групп</span>
+          <strong>{groups.length}</strong>
+        </article>
+        <article className={styles.statCard}>
+          <span>Всего учеников</span>
+          <strong>{totalStudents}</strong>
+        </article>
+        <article className={styles.statCard}>
+          <span>По текущему фильтру</span>
+          <strong>{filteredStudentsCount}</strong>
+        </article>
+      </div>
 
-      {filteredGroups.length === 0 ? (
+      <div className={styles.filters}>
+        <div className={styles.searchWrap}>
+          <label htmlFor="students-search">Поиск</label>
+          <input
+            id="students-search"
+            className={styles.search}
+            placeholder="ФИО, родитель, телефон, email"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <div className={styles.groupFilterWrap}>
+          <label htmlFor="students-group-filter">Группа</label>
+          <select
+            id="students-group-filter"
+            className={styles.groupFilter}
+            value={selectedGroupId}
+            onChange={(e) => setSelectedGroupId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+          >
+            <option value="all">Все группы</option>
+            {groupOptions.map((group) => (
+              <option key={group.id} value={group.id}>{group.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className={styles.empty}>Загрузка учеников...</p>
+      ) : filteredGroups.length === 0 ? (
         <p className={styles.empty}>Ничего не найдено.</p>
       ) : (
         <div className={styles.groupList}>
           {filteredGroups.map((group) => (
             <article key={group.group_id} className={styles.groupCard}>
               <div className={styles.groupHead}>
-                <h2>{group.group_name}</h2>
-                <span>{group.course_name ?? 'Без курса'}</span>
+                <div>
+                  <h2>{group.group_name}</h2>
+                  <span>{group.course_name ?? 'Без курса'}</span>
+                </div>
+                <div className={styles.groupMeta}>{group.students.length} учеников</div>
               </div>
 
               <div className={styles.studentsGrid}>
                 {group.students.map((student) => (
-                  <div className={styles.studentCard} key={student.id}>
-                    <strong>{student.second_name} {student.first_name} {student.patronymic ?? ''}</strong>
-                    <p>Родитель: {student.parent_full_name ?? 'не указан'}</p>
-                    <p>Контакт: {student.parent_phone ?? '-'} / {student.parent_email ?? '-'}</p>
+                  <article className={styles.studentCard} key={student.id}>
+                    <strong className={styles.studentName}>{student.second_name} {student.first_name} {student.patronymic ?? ''}</strong>
+                    <p><span>Родитель:</span> {student.parent_full_name ?? 'не указан'}</p>
+                    <p><span>Контакт:</span> {student.parent_phone ?? '-'} / {student.parent_email ?? '-'}</p>
                     <div className={styles.actions}>
                       <Link to={`/clients/${student.id}`} className={styles.linkBtn}>Открыть карточку</Link>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             </article>

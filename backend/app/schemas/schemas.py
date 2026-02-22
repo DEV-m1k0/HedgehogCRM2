@@ -211,6 +211,7 @@ class GroupRead(ORMBase):
 class LessonCreate(BaseModel):
     group_id: int
     topic: str
+    lesson_type: str = Field(default="group", pattern="^(individual|group|makeup)$")
     start_at: datetime
     end_at: datetime
     materials_url: str | None = None
@@ -223,6 +224,7 @@ class LessonCreate(BaseModel):
 class LessonUpdate(BaseModel):
     group_id: int | None = None
     topic: str | None = None
+    lesson_type: str | None = Field(default=None, pattern="^(individual|group|makeup)$")
     start_at: datetime | None = None
     end_at: datetime | None = None
     materials_url: str | None = None
@@ -236,6 +238,7 @@ class LessonRead(ORMBase):
     id: int
     group_id: int
     topic: str
+    lesson_type: str
     start_at: datetime
     end_at: datetime
     materials_url: str | None
@@ -309,6 +312,7 @@ class MakeupItemRead(BaseModel):
     absent_marked_by_user_id: int | None
     makeup_lesson_at: datetime | None
     makeup_teacher_id: int | None
+    makeup_group_id: int | None = None
     makeup_comment: str | None
     makeup_completed: bool
 
@@ -328,6 +332,9 @@ class MakeupCalendarEventRead(BaseModel):
     lesson_topic: str
     makeup_lesson_at: datetime
     makeup_completed: bool
+    makeup_group_id: int | None = None
+    makeup_teacher_id: int | None = None
+    participants_count: int = 1
 
 
 class DealCreate(BaseModel):

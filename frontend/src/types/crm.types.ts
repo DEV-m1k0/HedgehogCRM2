@@ -58,6 +58,7 @@ export interface Lesson {
   id: number;
   group_id: number;
   topic: string;
+  lesson_type: 'individual' | 'group' | 'makeup';
   start_at: string;
   end_at: string;
   materials_url: string | null;
@@ -122,6 +123,7 @@ export interface MakeupItem {
   absent_marked_by_user_id: number | null;
   makeup_lesson_at: string | null;
   makeup_teacher_id: number | null;
+  makeup_group_id?: number | null;
   makeup_comment: string | null;
   makeup_completed: boolean;
 }
@@ -134,6 +136,9 @@ export interface MakeupCalendarEvent {
   lesson_topic: string;
   makeup_lesson_at: string;
   makeup_completed: boolean;
+  makeup_group_id: number | null;
+  makeup_teacher_id: number | null;
+  participants_count: number;
 }
 
 export interface Deal {

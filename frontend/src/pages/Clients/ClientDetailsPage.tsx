@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { clientsApi } from '../../api/crm';
 import type { Client, StudentAttendanceStats, StudentMakeup, User } from '../../types/crm.types';
 import styles from './ClientDetailsPage.module.css';
@@ -21,8 +21,16 @@ const prettyDate = (value: string | null): string => {
   return date.toLocaleDateString();
 };
 
+const getMakeupStatusLabel = (item: StudentMakeup): string => {
+  if (item.makeup_completed) return 'Проведена';
+  if (item.makeup_lesson_at) return 'Назначена';
+  return 'Не назначена';
+};
+
 export const ClientDetailsPage = () => {
   const { clientId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const currentUser = getCurrentUser();
   const roleName = currentUser?.role?.name?.toLowerCase() ?? '';
   const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
@@ -50,6 +58,14 @@ export const ClientDetailsPage = () => {
 
   const backPath = useMemo(() => (isTeacher ? '/my-students' : '/clients'), [isTeacher]);
 
+  const handleBack = () => {
+    if (window.history.length > 1 && location.key !== 'default') {
+      navigate(-1);
+      return;
+    }
+    navigate(backPath);
+  };
+
   if (error) {
     if (isTeacher && error.toLowerCase().includes('доступ')) {
       return <Navigate to="/my-students" replace />;
@@ -61,16 +77,25 @@ export const ClientDetailsPage = () => {
     return <section className={styles.page}>Загрузка...</section>;
   }
 
+  const fullName = `${client.second_name} ${client.first_name}${client.patronymic ? ` ${client.patronymic}` : ''}`;
+  const attendanceRate = stats?.attendance_rate ?? 0;
+  const attendanceState = attendanceRate >= 80 ? 'Высокая' : attendanceRate >= 60 ? 'Средняя' : 'Низкая';
+
   return (
     <section className={styles.page}>
       <header className={styles.hero}>
-        <div>
+        <div className={styles.heroMain}>
           <p className={styles.kicker}>Карточка ученика</p>
-          <h1>{client.second_name} {client.first_name}</h1>
-          <p className={styles.subtle}>{client.patronymic ?? 'Без отчества'} • Дата рождения: {prettyDate(client.date_of_birth)}</p>
+          <h1>{fullName}</h1>
+          <p className={styles.subtle}>Дата рождения: {prettyDate(client.date_of_birth)}</p>
+          <div className={styles.heroMeta}>
+            <span className={styles.metaBadge}>ID #{client.id}</span>
+            <span className={styles.metaBadge}>Создан: {new Date(client.created_at).toLocaleDateString()}</span>
+            <span className={styles.metaBadge}>Посещаемость: {attendanceRate}% ({attendanceState})</span>
+          </div>
         </div>
         <div className={styles.heroActions}>
-          <Link to={backPath} className={styles.ghostBtn}>Назад</Link>
+          <button type="button" className={styles.ghostBtn} onClick={handleBack}>Назад</button>
           {isTeacher && (
             <Link to={`/my-students/${client.id}/edit`} className={styles.primaryBtn}>
               Редактировать
@@ -78,6 +103,25 @@ export const ClientDetailsPage = () => {
           )}
         </div>
       </header>
+
+      <section className={styles.kpiGrid}>
+        <article className={styles.kpiCard}>
+          <span>Всего занятий</span>
+          <strong>{stats?.total_lessons ?? 0}</strong>
+        </article>
+        <article className={styles.kpiCard}>
+          <span>Посещено / опозданий</span>
+          <strong>{stats ? `${stats.present_count} / ${stats.late_count}` : '0 / 0'}</strong>
+        </article>
+        <article className={styles.kpiCard}>
+          <span>Пропусков</span>
+          <strong>{stats?.absent_count ?? 0}</strong>
+        </article>
+        <article className={styles.kpiCard}>
+          <span>Хечхоги</span>
+          <strong>{stats?.total_hedgehogs ?? 0}</strong>
+        </article>
+      </section>
 
       <div className={styles.grid}>
         <article className={styles.card}>
@@ -89,30 +133,50 @@ export const ClientDetailsPage = () => {
           <div className={styles.field}>
             <span>Телефон</span>
             <strong>{client.parent_phone ?? 'не указан'}</strong>
+            {client.parent_phone ? <a className={styles.inlineLink} href={`tel:${client.parent_phone}`}>Позвонить</a> : null}
           </div>
           <div className={styles.field}>
             <span>Email</span>
             <strong>{client.parent_email ?? 'не указан'}</strong>
+            {client.parent_email ? <a className={styles.inlineLink} href={`mailto:${client.parent_email}`}>Написать</a> : null}
           </div>
         </article>
 
         <article className={styles.card}>
-          <h2>Дополнительная информация</h2>
+          <h2>Профиль ученика</h2>
           <div className={styles.field}>
             <span>Теги</span>
             <strong>{client.tags ?? 'нет тегов'}</strong>
           </div>
           <div className={styles.field}>
-            <span>ID ученика</span>
-            <strong>#{client.id}</strong>
+            <span>Статус посещаемости</span>
+            <strong>{attendanceState}</strong>
           </div>
           <div className={styles.field}>
-            <span>Создан</span>
-            <strong>{new Date(client.created_at).toLocaleString()}</strong>
+            <span>Среднее хечхогов / занятие</span>
+            <strong>{stats?.average_hedgehogs ?? 0}</strong>
           </div>
         </article>
 
-        <article className={styles.card}>
+        <article className={`${styles.card} ${styles.makeupCard}`}>
+          <h2>Отработки по пропускам</h2>
+          {makeups.length === 0 ? (
+            <p className={styles.subtle}>Пропусков с отработками пока нет.</p>
+          ) : (
+            <div className={styles.makeupList}>
+              {makeups.map((item) => (
+                <div key={item.attendance_id} className={styles.makeupRow}>
+                  <strong>{new Date(item.lesson_start_at).toLocaleDateString()} • {item.lesson_topic}</strong>
+                  <span className={styles.makeupStatus}>Статус: {getMakeupStatusLabel(item)}</span>
+                  <span>{item.makeup_lesson_at ? `Дата: ${new Date(item.makeup_lesson_at).toLocaleString()}` : 'Дата не назначена'}</span>
+                  {item.makeup_comment ? <span>Комментарий: {item.makeup_comment}</span> : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </article>
+
+        <article className={`${styles.card} ${styles.statsCard}`}>
           <h2>Статистика посещаемости</h2>
           {!stats ? (
             <p className={styles.subtle}>Статистика пока недоступна.</p>
@@ -128,24 +192,6 @@ export const ClientDetailsPage = () => {
               <div className={styles.field}><span>Назначено отработок</span><strong>{stats.makeups_scheduled}</strong></div>
               <div className={styles.field}><span>Проведено отработок</span><strong>{stats.makeups_completed}</strong></div>
             </>
-          )}
-        </article>
-
-        <article className={styles.card}>
-          <h2>Отработки по пропускам</h2>
-          {makeups.length === 0 ? (
-            <p className={styles.subtle}>Пропусков с отработками пока нет.</p>
-          ) : (
-            <div className={styles.makeupList}>
-              {makeups.map((item) => (
-                <div key={item.attendance_id} className={styles.makeupRow}>
-                  <strong>{new Date(item.lesson_start_at).toLocaleDateString()} • {item.lesson_topic}</strong>
-                  <span>Статус отработки: {item.makeup_completed ? 'Проведена' : item.makeup_lesson_at ? 'Назначена' : 'Не назначена'}</span>
-                  <span>{item.makeup_lesson_at ? `Дата: ${new Date(item.makeup_lesson_at).toLocaleString()}` : 'Дата не назначена'}</span>
-                  {item.makeup_comment ? <span>Комментарий: {item.makeup_comment}</span> : null}
-                </div>
-              ))}
-            </div>
           )}
         </article>
       </div>

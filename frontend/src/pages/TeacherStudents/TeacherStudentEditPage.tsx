@@ -96,17 +96,55 @@ export const TeacherStudentEditPage = () => {
         <p className={styles.loading}>Загрузка...</p>
       ) : (
         <form className={styles.form} onSubmit={submit}>
-          <input className={styles.input} value={form.second_name} onChange={(e) => setForm((p) => ({ ...p, second_name: e.target.value }))} placeholder="Фамилия" required />
-          <input className={styles.input} value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))} placeholder="Имя" required />
-          <input className={styles.input} value={form.patronymic} onChange={(e) => setForm((p) => ({ ...p, patronymic: e.target.value }))} placeholder="Отчество" />
-          <input className={styles.input} value={form.parent_full_name} onChange={(e) => setForm((p) => ({ ...p, parent_full_name: e.target.value }))} placeholder="ФИО родителя" />
-          <input className={styles.input} value={form.parent_phone} onChange={(e) => setForm((p) => ({ ...p, parent_phone: e.target.value }))} placeholder="Телефон родителя" />
-          <input className={styles.input} value={form.parent_email} onChange={(e) => setForm((p) => ({ ...p, parent_email: e.target.value }))} placeholder="Email родителя" />
-          <input className={styles.input} value={form.tags} onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))} placeholder="Теги" />
+          <section className={styles.section}>
+            <h2>Данные ученика</h2>
+            <div className={styles.fieldsGrid}>
+              <label className={styles.field}>
+                <span>Фамилия</span>
+                <input className={styles.input} value={form.second_name} onChange={(e) => setForm((p) => ({ ...p, second_name: e.target.value }))} placeholder="Иванов" required />
+              </label>
+              <label className={styles.field}>
+                <span>Имя</span>
+                <input className={styles.input} value={form.first_name} onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))} placeholder="Иван" required />
+              </label>
+              <label className={styles.field}>
+                <span>Отчество</span>
+                <input className={styles.input} value={form.patronymic} onChange={(e) => setForm((p) => ({ ...p, patronymic: e.target.value }))} placeholder="Иванович" />
+              </label>
+              <label className={styles.field}>
+                <span>Теги</span>
+                <input className={styles.input} value={form.tags} onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))} placeholder="python, web-дизайн" />
+              </label>
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <h2>Контакты родителя</h2>
+            <div className={styles.fieldsGrid}>
+              <label className={styles.field}>
+                <span>ФИО родителя</span>
+                <input className={styles.input} value={form.parent_full_name} onChange={(e) => setForm((p) => ({ ...p, parent_full_name: e.target.value }))} placeholder="Петрова Ольга Сергеевна" />
+              </label>
+              <label className={styles.field}>
+                <span>Телефон</span>
+                <input className={styles.input} value={form.parent_phone} onChange={(e) => setForm((p) => ({ ...p, parent_phone: e.target.value }))} placeholder="+7..." />
+              </label>
+              <label className={styles.field}>
+                <span>Email</span>
+                <input className={styles.input} type="email" value={form.parent_email} onChange={(e) => setForm((p) => ({ ...p, parent_email: e.target.value }))} placeholder="parent@example.com" />
+              </label>
+            </div>
+          </section>
+
+          <section className={styles.dangerZone}>
+            <h3>Опасная зона</h3>
+            <p>Архивация уберет ученика из активных списков. Восстановление возможно через архив.</p>
+            <button type="button" className={styles.danger} onClick={archiveStudent}>Архивировать ученика</button>
+          </section>
 
           <div className={styles.actions}>
-            <button type="button" className={styles.danger} onClick={archiveStudent}>Удалить</button>
-            <button type="submit" className={styles.primary}>Сохранить</button>
+            <Link to={`/clients/${clientId ?? ''}`} className={styles.secondary}>Отмена</Link>
+            <button type="submit" className={styles.primary}>Сохранить изменения</button>
           </div>
         </form>
       )}

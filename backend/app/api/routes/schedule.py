@@ -2,11 +2,12 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from sqlalchemy.orm import Session, aliased
 
 from app.api.deps import get_current_user
 from app.db import get_db
-from app.models import Attendance, Client, Lesson, StudyGroup, User
+from app.models import Attendance, Client, Course, Lesson, StudyGroup, User
 from app.schemas import (
     AttendanceRead,
     AttendanceUpsert,
@@ -40,6 +41,61 @@ def _is_manager_or_admin(user: User) -> bool:
 def _sync_lesson_conducted_state(lesson: Lesson) -> None:
     now = datetime.now()
     lesson.is_conducted = bool((not lesson.is_cancelled) and (_to_utc_naive(lesson.end_at) <= _to_utc_naive(now)))
+
+
+def _get_or_create_makeup_course(db: Session) -> Course:
+    course = db.query(Course).filter(Course.name == "Отработки", Course.archived_at.is_(None)).first()
+    if course:
+        return course
+
+    course = Course(
+        name="Отработки",
+        cost=0.0,
+        lesson_cost=0.0,
+        lesson_count=0,
+        module_count=1,
+    )
+    db.add(course)
+    db.flush()
+    return course
+
+
+def _get_or_create_makeup_group(db: Session, *, makeup_teacher_id: int, makeup_lesson_at: datetime) -> StudyGroup:
+    normalized_at = _to_utc_naive(makeup_lesson_at).replace(second=0, microsecond=0)
+    existing_group = (
+        db.query(StudyGroup)
+        .filter(
+            StudyGroup.archived_at.is_(None),
+            StudyGroup.is_temporary_makeup.is_(True),
+            StudyGroup.teacher_id == makeup_teacher_id,
+            StudyGroup.makeup_session_at == normalized_at,
+        )
+        .first()
+    )
+    if existing_group:
+        return existing_group
+
+    course = _get_or_create_makeup_course(db)
+    teacher = db.get(User, makeup_teacher_id)
+    teacher_label = f"{teacher.second_name} {teacher.first_name}" if teacher else f"ID {makeup_teacher_id}"
+    group_name = f"Отработка {normalized_at.strftime('%d.%m.%Y %H:%M')} — {teacher_label}"
+    fallback_counter = 2
+    while db.query(StudyGroup).filter(StudyGroup.name == group_name).first():
+        group_name = f"Отработка {normalized_at.strftime('%d.%m.%Y %H:%M')} — {teacher_label} ({fallback_counter})"
+        fallback_counter += 1
+
+    group = StudyGroup(
+        name=group_name,
+        course_id=course.id,
+        teacher_id=makeup_teacher_id,
+        schedule_text="Временная группа для отработки",
+        audience="makeup",
+        is_temporary_makeup=True,
+        makeup_session_at=normalized_at,
+    )
+    db.add(group)
+    db.flush()
+    return group
 
 
 def _resolve_cancel_marker_id(db: Session, lesson: Lesson, current_user: User) -> int | None:
@@ -107,6 +163,7 @@ def _sync_cancelled_attendance(
             attendance.absent_marked_by_user_id = None
             attendance.makeup_lesson_at = None
             attendance.makeup_teacher_id = None
+            attendance.makeup_group_id = None
             attendance.makeup_comment = None
             attendance.makeup_completed = False
 
@@ -133,6 +190,9 @@ def create_lesson(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Lesson:
+    if payload.lesson_type == "makeup" and not _is_manager_or_admin(current_user):
+        raise HTTPException(status_code=403, detail="Отработки может создавать только менеджер или администратор")
+
     start_at = _to_utc_naive(payload.start_at)
     end_at = _to_utc_naive(payload.end_at)
 
@@ -148,6 +208,7 @@ def create_lesson(
     lesson = Lesson(
         group_id=payload.group_id,
         topic=payload.topic,
+        lesson_type=payload.lesson_type,
         start_at=start_at,
         end_at=end_at,
         materials_url=payload.materials_url,
@@ -168,6 +229,7 @@ def create_lesson(
             recurring_lesson = Lesson(
                 group_id=payload.group_id,
                 topic=payload.topic,
+                lesson_type=payload.lesson_type,
                 start_at=next_start,
                 end_at=next_end,
                 materials_url=payload.materials_url,
@@ -215,6 +277,8 @@ def update_lesson(
         raise HTTPException(status_code=404, detail="Занятие не найдено")
 
     values = payload.model_dump(exclude_unset=True)
+    if values.get("lesson_type") == "makeup" and not _is_manager_or_admin(current_user):
+        raise HTTPException(status_code=403, detail="Отработки может создавать только менеджер или администратор")
     apply_to_future = values.pop("apply_to_future", False)
     original_start = _to_utc_naive(lesson.start_at)
     original_end = _to_utc_naive(lesson.end_at)
@@ -410,10 +474,19 @@ def upsert_attendance(
             attendance.absent_marked_by_user_id = None
             attendance.makeup_lesson_at = None
             attendance.makeup_teacher_id = None
+            attendance.makeup_group_id = None
             attendance.makeup_comment = None
             attendance.makeup_completed = False
         attendance.makeup_lesson_at = _to_utc_naive(payload.makeup_lesson_at) if payload.makeup_lesson_at else None
         attendance.makeup_teacher_id = payload.makeup_teacher_id
+        attendance.makeup_group_id = None
+        if payload.makeup_teacher_id is not None and payload.makeup_lesson_at is not None:
+            makeup_group = _get_or_create_makeup_group(
+                db,
+                makeup_teacher_id=payload.makeup_teacher_id,
+                makeup_lesson_at=payload.makeup_lesson_at,
+            )
+            attendance.makeup_group_id = makeup_group.id
         attendance.makeup_comment = payload.makeup_comment
         attendance.makeup_completed = payload.makeup_completed
     else:
@@ -484,6 +557,7 @@ def list_makeups(
                 absent_marked_by_user_id=attendance.absent_marked_by_user_id,
                 makeup_lesson_at=attendance.makeup_lesson_at,
                 makeup_teacher_id=attendance.makeup_teacher_id,
+                makeup_group_id=attendance.makeup_group_id,
                 makeup_comment=attendance.makeup_comment,
                 makeup_completed=attendance.makeup_completed,
             )
@@ -519,6 +593,12 @@ def assign_makeup(
 
     attendance.makeup_lesson_at = _to_utc_naive(payload.makeup_lesson_at)
     attendance.makeup_teacher_id = payload.makeup_teacher_id
+    makeup_group = _get_or_create_makeup_group(
+        db,
+        makeup_teacher_id=payload.makeup_teacher_id,
+        makeup_lesson_at=payload.makeup_lesson_at,
+    )
+    attendance.makeup_group_id = makeup_group.id
     attendance.makeup_comment = payload.makeup_comment
     attendance.makeup_completed = payload.makeup_completed
     db.commit()
@@ -544,6 +624,7 @@ def assign_makeup(
         absent_marked_by_user_id=attendance.absent_marked_by_user_id,
         makeup_lesson_at=attendance.makeup_lesson_at,
         makeup_teacher_id=attendance.makeup_teacher_id,
+        makeup_group_id=attendance.makeup_group_id,
         makeup_comment=attendance.makeup_comment,
         makeup_completed=attendance.makeup_completed,
     )
@@ -560,17 +641,25 @@ def list_makeup_calendar_events(
     if _is_teacher(current_user):
         effective_teacher_id = current_user.id
 
+    source_group_alias = aliased(StudyGroup)
+    makeup_group_alias = aliased(StudyGroup)
+
     query = (
-        db.query(Attendance, Lesson, StudyGroup, Client)
+        db.query(Attendance, Lesson, source_group_alias, Client, makeup_group_alias)
         .join(Lesson, Lesson.id == Attendance.lesson_id)
-        .join(StudyGroup, StudyGroup.id == Lesson.group_id)
+        .join(source_group_alias, source_group_alias.id == Lesson.group_id)
         .join(Client, Client.id == Attendance.client_id)
+        .join(makeup_group_alias, makeup_group_alias.id == Attendance.makeup_group_id, isouter=True)
         .filter(
             Attendance.status == "absent",
             Attendance.makeup_lesson_at.is_not(None),
             Attendance.makeup_teacher_id.is_not(None),
             Lesson.archived_at.is_(None),
-            StudyGroup.archived_at.is_(None),
+            source_group_alias.archived_at.is_(None),
+            or_(
+                makeup_group_alias.id.is_(None),
+                makeup_group_alias.archived_at.is_(None),
+            ),
             Client.archived_at.is_(None),
         )
     )
@@ -580,18 +669,51 @@ def list_makeup_calendar_events(
     if not include_completed:
         query = query.filter(Attendance.makeup_completed.is_(False))
 
-    rows = query.order_by(Attendance.makeup_lesson_at.asc()).all()
+    rows = query.order_by(Attendance.makeup_lesson_at.asc(), Attendance.id.asc()).all()
+    grouped: dict[str, dict[str, object]] = {}
+    for attendance, lesson, source_group, client, makeup_group in rows:
+        event_time = attendance.makeup_lesson_at
+        if event_time is None:
+            continue
+        key = f"{attendance.makeup_teacher_id}:{event_time.isoformat()}:{attendance.makeup_group_id or 0}"
+        if key not in grouped:
+            grouped[key] = {
+                "attendance_id": attendance.id,
+                "client_id": client.id,
+                "client_names": [],
+                "group_name": makeup_group.name if makeup_group else source_group.name,
+                "lesson_topic": "Отработка",
+                "makeup_lesson_at": event_time,
+                "all_completed": True,
+                "makeup_group_id": attendance.makeup_group_id,
+                "makeup_teacher_id": attendance.makeup_teacher_id,
+            }
+        grouped[key]["client_names"].append(f"{client.second_name} {client.first_name}")  # type: ignore[index]
+        grouped[key]["all_completed"] = bool(grouped[key]["all_completed"] and attendance.makeup_completed)  # type: ignore[index]
+
     result: list[MakeupCalendarEventRead] = []
-    for attendance, lesson, group, client in rows:
+    for grouped_event in grouped.values():
+        client_names = grouped_event["client_names"]  # type: ignore[assignment]
+        if isinstance(client_names, list):
+            if len(client_names) <= 2:
+                client_label = ", ".join(client_names)
+            else:
+                client_label = f"{', '.join(client_names[:2])} и еще {len(client_names) - 2}"
+        else:
+            client_label = "Ученик"
         result.append(
             MakeupCalendarEventRead(
-                attendance_id=attendance.id,
-                client_id=client.id,
-                client_full_name=f"{client.second_name} {client.first_name}",
-                group_name=group.name,
-                lesson_topic=lesson.topic,
-                makeup_lesson_at=attendance.makeup_lesson_at,
-                makeup_completed=attendance.makeup_completed,
+                attendance_id=int(grouped_event["attendance_id"]),
+                client_id=int(grouped_event["client_id"]),
+                client_full_name=client_label,
+                group_name=str(grouped_event["group_name"]),
+                lesson_topic="Групповая отработка",
+                makeup_lesson_at=grouped_event["makeup_lesson_at"],  # type: ignore[arg-type]
+                makeup_completed=bool(grouped_event["all_completed"]),
+                makeup_group_id=int(grouped_event["makeup_group_id"]) if grouped_event.get("makeup_group_id") else None,
+                makeup_teacher_id=int(grouped_event["makeup_teacher_id"]) if grouped_event.get("makeup_teacher_id") else None,
+                participants_count=len(client_names) if isinstance(client_names, list) else 1,
             )
         )
+    result.sort(key=lambda row: row.makeup_lesson_at)
     return result

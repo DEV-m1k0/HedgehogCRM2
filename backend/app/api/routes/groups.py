@@ -12,7 +12,15 @@ router = APIRouter()
 
 @router.get("", response_model=list[GroupRead])
 def list_groups(db: Session = Depends(get_db)) -> list[StudyGroup]:
-    return db.query(StudyGroup).filter(StudyGroup.archived_at.is_(None)).order_by(StudyGroup.id.desc()).all()
+    return (
+        db.query(StudyGroup)
+        .filter(
+            StudyGroup.archived_at.is_(None),
+            StudyGroup.is_temporary_makeup.is_(False),
+        )
+        .order_by(StudyGroup.id.desc())
+        .all()
+    )
 
 
 @router.post("", response_model=GroupRead, status_code=status.HTTP_201_CREATED)

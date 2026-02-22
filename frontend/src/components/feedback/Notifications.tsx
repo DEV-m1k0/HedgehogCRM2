@@ -48,6 +48,16 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
     }, 4000);
   }, []);
 
+  const dismissToast = useCallback((id: number) => {
+    setToastIds((prev) => prev.filter((toastId) => toastId !== id));
+    setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+  }, []);
+
+  const dismissAllToasts = useCallback(() => {
+    setToastIds([]);
+    setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+  }, []);
+
   const markAsRead = useCallback((id: number) => {
     setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
   }, []);
@@ -70,14 +80,29 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
   return (
     <NotificationsContext.Provider value={value}>
       {children}
-      <div className="notifications">
-        {toastItems.map((item) => (
-          <article key={item.id} className={`notification notification--${item.type}`}>
-            <p className="notification-title">{item.title}</p>
-            <p className="notification-text">{item.message}</p>
-          </article>
-        ))}
-      </div>
+      {toastItems.length > 0 && (
+        <div className="notifications" role="status" aria-live="polite">
+          <div className="notifications-actions">
+            <button type="button" className="notifications-hide-all" onClick={dismissAllToasts}>
+              Скрыть все
+            </button>
+          </div>
+          {toastItems.map((item) => (
+            <article key={item.id} className={`notification notification--${item.type}`}>
+              <button
+                type="button"
+                className="notification-close"
+                onClick={() => dismissToast(item.id)}
+                aria-label="Скрыть уведомление"
+              >
+                ×
+              </button>
+              <p className="notification-title">{item.title}</p>
+              <p className="notification-text">{item.message}</p>
+            </article>
+          ))}
+        </div>
+      )}
     </NotificationsContext.Provider>
   );
 };

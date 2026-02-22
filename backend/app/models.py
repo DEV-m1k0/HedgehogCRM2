@@ -99,6 +99,8 @@ class StudyGroup(Base):
     teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     schedule_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
     audience: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    is_temporary_makeup: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    makeup_session_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     course: Mapped[Course] = relationship(back_populates="groups")
@@ -122,6 +124,7 @@ class Lesson(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"), nullable=False)
     topic: Mapped[str] = mapped_column(String(255), nullable=False)
+    lesson_type: Mapped[str] = mapped_column(String(20), default="group", nullable=False)
     start_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     materials_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
@@ -150,6 +153,7 @@ class Attendance(Base):
     absent_marked_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     makeup_lesson_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     makeup_teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    makeup_group_id: Mapped[int | None] = mapped_column(ForeignKey("groups.id"), nullable=True)
     makeup_comment: Mapped[str | None] = mapped_column(String(255), nullable=True)
     makeup_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
@@ -157,6 +161,7 @@ class Attendance(Base):
     student: Mapped[Client] = relationship(back_populates="attendance")
     absent_marked_by_user: Mapped[User | None] = relationship(foreign_keys=[absent_marked_by_user_id])
     makeup_teacher: Mapped[User | None] = relationship(foreign_keys=[makeup_teacher_id])
+    makeup_group: Mapped[StudyGroup | None] = relationship(foreign_keys=[makeup_group_id])
 
 
 class Deal(Base):

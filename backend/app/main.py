@@ -44,6 +44,8 @@ def _ensure_schedule_schema() -> None:
             connection.execute(text("ALTER TABLE lessons ADD COLUMN recurrence_group_id VARCHAR(64)"))
         if "is_cancelled" not in lesson_columns:
             connection.execute(text("ALTER TABLE lessons ADD COLUMN is_cancelled BOOLEAN NOT NULL DEFAULT 0"))
+        if "lesson_type" not in lesson_columns:
+            connection.execute(text("ALTER TABLE lessons ADD COLUMN lesson_type VARCHAR(20) NOT NULL DEFAULT 'group'"))
 
 
 def _ensure_archive_schema() -> None:
@@ -90,6 +92,8 @@ def _ensure_attendance_schema() -> None:
             connection.execute(text("ALTER TABLE attendance ADD COLUMN makeup_lesson_at DATETIME"))
         if "makeup_teacher_id" not in attendance_columns:
             connection.execute(text("ALTER TABLE attendance ADD COLUMN makeup_teacher_id INTEGER"))
+        if "makeup_group_id" not in attendance_columns:
+            connection.execute(text("ALTER TABLE attendance ADD COLUMN makeup_group_id INTEGER"))
         if "makeup_comment" not in attendance_columns:
             connection.execute(text("ALTER TABLE attendance ADD COLUMN makeup_comment VARCHAR(255)"))
         if "makeup_completed" not in attendance_columns:
@@ -118,6 +122,18 @@ def _ensure_attendance_schema() -> None:
         )
 
 
+def _ensure_makeup_groups_schema() -> None:
+    inspector = inspect(engine)
+    if "groups" not in inspector.get_table_names():
+        return
+    group_columns = {column["name"] for column in inspector.get_columns("groups")}
+    with engine.begin() as connection:
+        if "is_temporary_makeup" not in group_columns:
+            connection.execute(text("ALTER TABLE groups ADD COLUMN is_temporary_makeup BOOLEAN NOT NULL DEFAULT 0"))
+        if "makeup_session_at" not in group_columns:
+            connection.execute(text("ALTER TABLE groups ADD COLUMN makeup_session_at DATETIME"))
+
+
 def create_app() -> FastAPI:
     setup_logging()
     logger = logging.getLogger("hedgehog.api")
@@ -138,6 +154,7 @@ def create_app() -> FastAPI:
         _ensure_archive_schema()
         _ensure_auth_schema()
         _ensure_attendance_schema()
+        _ensure_makeup_groups_schema()
         _seed_roles()
         logger.info("Application startup completed")
 

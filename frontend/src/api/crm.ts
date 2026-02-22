@@ -70,6 +70,7 @@ export const coursesApi = {
 export const groupsApi = {
   list: () => api.get<Group[]>('/groups'),
   students: (groupId: number) => api.get<Client[]>(`/groups/${groupId}/students`),
+  addStudent: (groupId: number, payload: { client_id: number }) => api.post<{ message: string }>(`/groups/${groupId}/students`, payload),
   create: (payload: {
     name: string;
     course_id: number;
@@ -97,6 +98,7 @@ export const scheduleApi = {
   createLesson: (payload: {
     group_id: number;
     topic: string;
+    lesson_type?: 'individual' | 'group' | 'makeup';
     start_at: string;
     end_at: string;
     materials_url?: string;
@@ -108,6 +110,7 @@ export const scheduleApi = {
   updateLesson: (id: number, payload: {
     group_id?: number;
     topic?: string;
+    lesson_type?: 'individual' | 'group' | 'makeup';
     start_at?: string;
     end_at?: string;
     materials_url?: string | null;

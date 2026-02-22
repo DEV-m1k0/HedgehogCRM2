@@ -21,7 +21,6 @@ import { NotificationsProvider } from './components/feedback/Notifications';
 import { AdminActivityPage } from './pages/Admin/AdminActivityPage';
 import { TeacherStudentsPage } from './pages/TeacherStudents/TeacherStudentsPage';
 import { TeacherStudentEditPage } from './pages/TeacherStudents/TeacherStudentEditPage';
-import { MakeupsPage } from './pages/Makeups/MakeupsPage';
 import type { User } from './types/crm.types';
 
 const HomePageRedirect = () => {
@@ -84,7 +83,7 @@ function App() {
           <Route path="/calendar" element={<SchedulePage />} />
           <Route path="/calendar/new" element={<LessonFormPage />} />
           <Route path="/calendar/:lessonId/edit" element={<LessonFormPage />} />
-          <Route path="/makeups" element={<MakeupsPage />} />
+          <Route path="/makeups" element={<Navigate to="/calendar" replace />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/messages/inbox" element={<MessagesPage box="inbox" />} />
           <Route path="/messages/sent" element={<MessagesPage box="sent" />} />

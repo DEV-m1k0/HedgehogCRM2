@@ -3,16 +3,56 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  max-width: 960px;
+  width: 100%;
 }
 
 .lesson-form-page h1 {
   margin: 0 0 4px;
 }
 
+.lesson-form-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lesson-back-btn {
+  border: 1px solid #d6d9df;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #243240;
+  padding: 7px 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.lesson-back-btn:hover {
+  border-color: #b7c2d0;
+  background: #eef2f7;
+}
+
 .lesson-form-subtitle {
   margin: 0 0 16px;
   color: var(--text-dark-mute);
+}
+
+.lesson-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.lesson-meta-chip {
+  border: 1px solid #dbe7f5;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 12px;
+  color: #355d85;
+  background: #f2f7ff;
+  font-weight: 700;
 }
 
 .lesson-form-error {
@@ -23,9 +63,49 @@
   padding: 10px;
 }
 
+.lesson-create-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lesson-create-tab {
+  border: 1px solid #d6d9df;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lesson-create-tab--active {
+  border-color: #1264a3;
+  background: #eaf4ff;
+  color: #1264a3;
+}
+
 .lesson-form {
   display: grid;
   gap: 12px;
+}
+
+.lesson-form-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.lesson-form-section h2 {
+  margin: 0;
+  font-size: 17px;
+  color: #1e293b;
 }
 
 .lesson-form label {
@@ -34,13 +114,29 @@
   font-weight: 500;
 }
 
-.lesson-form input,
+.lesson-form input:not([type='checkbox']):not([type='radio']),
 .lesson-form textarea,
 .lesson-form select {
   border: 1px solid #d6d9df;
   border-radius: 8px;
   padding: 10px 12px;
   font: inherit;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.lesson-form select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lesson-form input[type='checkbox'],
+.lesson-form input[type='radio'] {
+  width: auto;
+  min-width: auto;
+  box-sizing: content-box;
 }
 
 .lesson-form textarea {
@@ -48,10 +144,20 @@
   resize: vertical;
 }
 
+.lesson-form-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
 .lesson-form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.lesson-form-row > label {
+  min-width: 0;
 }
 
 .duration-row {
@@ -65,6 +171,38 @@
 .duration-actions {
   display: flex;
   gap: 8px;
+  padding: 3px;
+  border: 1px solid #d9e0ea;
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.duration-chip {
+  border: 1px solid #d6d9df;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.duration-chip:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.duration-chip--active {
+  background: #e8f1fb;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.duration-chip:focus-visible {
+  outline: 2px solid #94a3b8;
+  outline-offset: 2px;
 }
 
 .lesson-form-checkbox {
@@ -88,13 +226,22 @@
 
 .delete-scope-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   border: 1px solid #dfe7f2;
   border-radius: 10px;
   padding: 10px 12px;
   background: #f8fafc;
   cursor: pointer;
+  min-width: 0;
+}
+
+.delete-scope-item span {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .delete-scope-item.active {
@@ -111,6 +258,19 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.lesson-form-actions--sticky {
+  position: sticky;
+  bottom: 10px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px;
+  backdrop-filter: blur(2px);
+  width: fit-content;
+  margin-left: auto;
 }
 
 .lesson-form-actions button,
@@ -189,12 +349,13 @@
 
 .attendance-item {
   display: grid;
-  grid-template-columns: 1.4fr 180px 1fr 170px;
-  gap: 10px;
-  align-items: center;
+  grid-template-columns: minmax(250px, 1fr) 2fr;
+  gap: 16px;
+  align-items: stretch;
   border: 1px solid #d9e0ea;
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
+  background: #ffffff;
 }
 
 .attendance-item--present {
@@ -220,6 +381,12 @@
   font-size: 13px;
 }
 
+.attendance-student {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+}
+
 .attendance-badge {
   display: inline-flex;
   margin-top: 6px;
@@ -242,17 +409,6 @@
 .attendance-badge--absent {
   background: #ffe2e2;
   color: #9f1239;
-}
-
-.attendance-link {
-  color: #1264a3;
-  text-decoration: none;
-  font-weight: 600;
-  justify-self: end;
-}
-
-.attendance-link:hover {
-  text-decoration: underline;
 }
 
 .attendance-student-link {
@@ -280,6 +436,37 @@
   outline: none;
   border-color: #1264a3;
   box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.15);
+}
+
+.attendance-controls {
+  display: grid;
+  grid-template-columns: 170px minmax(220px, 1fr) 140px;
+  gap: 10px;
+  align-items: end;
+  min-width: 0;
+}
+
+.attendance-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.attendance-field > span {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.attendance-hedgehogs-field input {
+  text-align: center;
+}
+
+.attendance-controls .attendance-select,
+.attendance-controls .attendance-comment-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .attendance-extra-grid {
@@ -313,6 +500,14 @@
     grid-template-columns: 1fr;
   }
 
+  .attendance-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .attendance-hedgehogs-field {
+    grid-column: 1 / -1;
+  }
+
   .attendance-extra-grid {
     grid-template-columns: 1fr;
   }
@@ -321,9 +516,6 @@
     grid-column: auto;
   }
 
-  .attendance-link {
-    justify-self: start;
-  }
 }
 
 @media (max-width: 720px) {
@@ -339,5 +531,14 @@
   .attendance-header-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .lesson-form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .lesson-form-actions button {
+    width: 100%;
   }
 }
