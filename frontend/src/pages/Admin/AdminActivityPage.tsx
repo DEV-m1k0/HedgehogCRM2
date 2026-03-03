@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import type { AdminUserActivity, AuditLogItem, UserSessionInfo } from '../../types/crm.types';
 import styles from './AdminActivityPage.module.css';
 
 export const AdminActivityPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const [users, setUsers] = useState<AdminUserActivity[]>([]);
   const [sessions, setSessions] = useState<UserSessionInfo[]>([]);
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
@@ -144,7 +146,12 @@ export const AdminActivityPage = () => {
                         className={styles.dangerBtn}
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm('Завершить эту сессию пользователя?')) return;
+                          if (!(await confirm({
+                            title: 'Завершение сессии',
+                            message: 'Завершить эту сессию пользователя?',
+                            confirmText: 'Завершить',
+                            variant: 'danger',
+                          }))) return;
                           try {
                             await adminApi.terminateSession(session.session_id);
                             notify('info', 'Сессия завершена', 'Доступ пользователя по этой сессии прекращен.');

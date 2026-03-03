@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { clientsApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import type { Client, User } from '../../types/crm.types';
 import styles from './TeacherStudentEditPage.module.css';
 
@@ -17,6 +18,7 @@ const getCurrentUser = (): User | null => {
 
 export const TeacherStudentEditPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const navigate = useNavigate();
   const { clientId } = useParams();
 
@@ -29,6 +31,7 @@ export const TeacherStudentEditPage = () => {
     first_name: '',
     second_name: '',
     patronymic: '',
+    date_of_birth: '',
     parent_full_name: '',
     parent_phone: '',
     parent_email: '',
@@ -44,6 +47,7 @@ export const TeacherStudentEditPage = () => {
           first_name: student.first_name,
           second_name: student.second_name,
           patronymic: student.patronymic ?? '',
+          date_of_birth: student.date_of_birth ? student.date_of_birth.slice(0, 10) : '',
           parent_full_name: student.parent_full_name ?? '',
           parent_phone: student.parent_phone ?? '',
           parent_email: student.parent_email ?? '',
@@ -59,10 +63,17 @@ export const TeacherStudentEditPage = () => {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!clientId) return;
-    if (!window.confirm('Сохранить изменения ученика?')) return;
+    if (!(await confirm({
+      title: 'Сохранение ученика',
+      message: 'Сохранить изменения ученика?',
+      confirmText: 'Сохранить',
+    }))) return;
 
     try {
-      await clientsApi.update(Number(clientId), form);
+      await clientsApi.update(Number(clientId), {
+        ...form,
+        date_of_birth: form.date_of_birth || null,
+      });
       notify('success', 'Сохранено', 'Данные ученика обновлены.', { href: `/clients/${clientId}` });
       navigate(`/clients/${clientId}`);
     } catch {
@@ -72,7 +83,12 @@ export const TeacherStudentEditPage = () => {
 
   const archiveStudent = async () => {
     if (!clientId) return;
-    if (!window.confirm('Архивировать ученика?')) return;
+    if (!(await confirm({
+      title: 'Архивация ученика',
+      message: 'Архивировать ученика?',
+      confirmText: 'Архивировать',
+      variant: 'danger',
+    }))) return;
     try {
       await clientsApi.remove(Number(clientId));
       notify('info', 'Ученик архивирован', 'Ученик убран из активного списка.', { href: '/archive' });
@@ -110,6 +126,10 @@ export const TeacherStudentEditPage = () => {
               <label className={styles.field}>
                 <span>Отчество</span>
                 <input className={styles.input} value={form.patronymic} onChange={(e) => setForm((p) => ({ ...p, patronymic: e.target.value }))} placeholder="Иванович" />
+              </label>
+              <label className={styles.field}>
+                <span>Дата рождения</span>
+                <input className={styles.input} type="date" value={form.date_of_birth} onChange={(e) => setForm((p) => ({ ...p, date_of_birth: e.target.value }))} />
               </label>
               <label className={styles.field}>
                 <span>Теги</span>

@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import styles from './styles/Header.module.css';
 import type { UserType } from '../../types/User.types';
 import { useNotifications } from '../feedback/Notifications';
-import { clientsApi, coursesApi, dealsApi, groupsApi, scheduleApi, tasksApi } from '../../api/crm';
-import type { Client, Course, Deal, Group, Lesson, Task } from '../../types/crm.types';
+import { clientsApi, coursesApi, dealsApi, groupsApi, metaApi, scheduleApi, tasksApi } from '../../api/crm';
+import type { Client, Course, Deal, Group, Lesson, Task, User as CrmUser } from '../../types/crm.types';
+import { loadTeacherSettings } from '../../utils/teacherSettings';
+import { useAppLanguage } from '../../i18n/AppLanguage';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -29,14 +31,23 @@ const emptyUser: UserType = {
   patronymic: null,
   income_per_hour: 0,
   phone: null,
+  avatar_url: null,
   is_accepted: false,
   created_at: new Date().toISOString(),
   role: { id: 0, name: '' },
+};
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
+const resolveApiUrl = (value?: string | null) => {
+  if (!value) return null;
+  if (value.startsWith('http://') || value.startsWith('https://')) return value;
+  return `${API_BASE_URL}${value}`;
 };
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMobileMenuOpen = false }) => {
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { language } = useAppLanguage();
+  const isEn = language === 'en';
   const [isMobile, setIsMobile] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [user, setUser] = useState<UserType>(emptyUser);
@@ -52,37 +63,49 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
   const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
   const isAdmin = roleName.includes('администратор') || roleName.includes('admin');
   const isManager = roleName.includes('менеджер') || roleName.includes('manager');
+  const avatarImage = resolveApiUrl(user.avatar_url);
+  const teacherSettings = useMemo(() => loadTeacherSettings(user), [user]);
 
   const pageResults = useMemo(() => {
     const pages: SearchResultItem[] = [
-      { id: 'page-account', label: 'Профиль', hint: 'Личный кабинет', href: '/account', section: 'Страницы' },
-      { id: 'page-calendar', label: 'Календарь', hint: 'Расписание занятий', href: '/calendar', section: 'Страницы' },
-      { id: 'page-analytics', label: 'Аналитика', hint: 'Отчеты и показатели', href: '/analytics', section: 'Страницы' },
-      { id: 'page-settings', label: 'Настройки', hint: 'Параметры аккаунта', href: '/settings', section: 'Страницы' },
+      { id: 'page-account', label: isEn ? 'Profile' : 'Профиль', hint: isEn ? 'Personal account' : 'Личный кабинет', href: '/account', section: isEn ? 'Pages' : 'Страницы' },
+      { id: 'page-calendar', label: isEn ? 'Calendar' : 'Календарь', hint: isEn ? 'Lesson schedule' : 'Расписание занятий', href: '/calendar', section: isEn ? 'Pages' : 'Страницы' },
+      { id: 'page-analytics', label: isEn ? 'Analytics' : 'Аналитика', hint: isEn ? 'Reports and metrics' : 'Отчеты и показатели', href: '/analytics', section: isEn ? 'Pages' : 'Страницы' },
+      { id: 'page-settings', label: isEn ? 'Settings' : 'Настройки', hint: isEn ? 'Account preferences' : 'Параметры аккаунта', href: '/settings', section: isEn ? 'Pages' : 'Страницы' },
+      { id: 'page-staff', label: isEn ? 'Team' : 'Команда', hint: isEn ? 'Staff directory' : 'Справочник сотрудников', href: '/staff', section: isEn ? 'Pages' : 'Страницы' },
     ];
     if (isTeacher) {
-      pages.push({ id: 'page-my-students', label: 'Мои ученики', hint: 'Список учеников преподавателя', href: '/my-students', section: 'Страницы' });
+      pages.push({ id: 'page-my-students', label: isEn ? 'My Students' : 'Мои ученики', hint: isEn ? 'Teacher student list' : 'Список учеников преподавателя', href: '/my-students', section: isEn ? 'Pages' : 'Страницы' });
     } else {
       pages.push(
-        { id: 'page-clients', label: 'Клиенты', hint: 'База учеников и клиентов', href: '/clients', section: 'Страницы' },
-        { id: 'page-deals', label: 'Сделки', hint: 'Работа с воронкой', href: '/deals', section: 'Страницы' },
-        { id: 'page-tasks', label: 'Задачи', hint: 'Текущие задачи команды', href: '/tasks', section: 'Страницы' },
+        { id: 'page-clients', label: isEn ? 'Clients' : 'Клиенты', hint: isEn ? 'Client and student base' : 'База учеников и клиентов', href: '/clients', section: isEn ? 'Pages' : 'Страницы' },
+        { id: 'page-deals', label: isEn ? 'Deals' : 'Сделки', hint: isEn ? 'Sales pipeline' : 'Работа с воронкой', href: '/deals', section: isEn ? 'Pages' : 'Страницы' },
+        { id: 'page-tasks', label: isEn ? 'Tasks' : 'Задачи', hint: isEn ? 'Team tasks' : 'Текущие задачи команды', href: '/tasks', section: isEn ? 'Pages' : 'Страницы' },
       );
       if (isAdmin || isManager) {
-        pages.push({ id: 'page-makeups', label: 'Отработки', hint: 'Назначение и контроль отработок', href: '/makeups', section: 'Страницы' });
+        pages.push({ id: 'page-makeups', label: isEn ? 'Makeups' : 'Отработки', hint: isEn ? 'Makeup planning and control' : 'Назначение и контроль отработок', href: '/makeups', section: isEn ? 'Pages' : 'Страницы' });
       }
     }
     if (isAdmin) {
-      pages.push({ id: 'page-admin-activity', label: 'Активность пользователей', hint: 'Админ панель', href: '/admin/activity', section: 'Страницы' });
+      pages.push({ id: 'page-admin-activity', label: isEn ? 'User Activity' : 'Активность пользователей', hint: isEn ? 'Admin panel' : 'Админ панель', href: '/admin/activity', section: isEn ? 'Pages' : 'Страницы' });
     }
     return pages;
-  }, [isAdmin, isManager, isTeacher]);
+  }, [isAdmin, isEn, isManager, isTeacher]);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const syncUser = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+    syncUser();
+    window.addEventListener('storage', syncUser);
+    window.addEventListener('user-updated', syncUser as EventListener);
+    return () => {
+      window.removeEventListener('storage', syncUser);
+      window.removeEventListener('user-updated', syncUser as EventListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -128,6 +151,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
             scheduleApi.lessons(user.id),
             groupsApi.list(),
             coursesApi.list(),
+            metaApi.users(),
           ]
           : [
             clientsApi.list(),
@@ -136,6 +160,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
             coursesApi.list(),
             dealsApi.list(),
             tasksApi.list(),
+            metaApi.users(),
           ];
 
         const responses = await Promise.all(dataRequests);
@@ -147,12 +172,14 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
         let courses: Course[] = [];
         let deals: Deal[] = [];
         let tasks: Task[] = [];
+        let staffUsers: CrmUser[] = [];
 
         if (isTeacher) {
           clients = responses[0].data as Client[];
           lessons = responses[1].data as Lesson[];
           groups = (responses[2].data as Group[]).filter((group) => group.teacher_id === user.id);
           courses = responses[3].data as Course[];
+          staffUsers = responses[4].data as CrmUser[];
         } else {
           clients = responses[0].data as Client[];
           lessons = responses[1].data as Lesson[];
@@ -160,6 +187,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           courses = responses[3].data as Course[];
           deals = responses[4].data as Deal[];
           tasks = responses[5].data as Task[];
+          staffUsers = responses[6].data as CrmUser[];
         }
 
         const groupMap = new Map(groups.map((group) => [group.id, group]));
@@ -177,7 +205,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           }));
 
         const lessonResults = lessons
-          .filter((lesson) => lesson.topic.toLowerCase().includes(term))
+          .filter((lesson) => {
+            const group = groupMap.get(lesson.group_id);
+            const courseName = group ? (courseMap.get(group.course_id)?.name ?? '') : '';
+            const haystack = `${lesson.topic} ${group?.name ?? ''} ${courseName}`.toLowerCase();
+            return haystack.includes(term);
+          })
           .slice(0, 6)
           .map((lesson) => {
             const group = groupMap.get(lesson.group_id);
@@ -213,6 +246,21 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
             section: 'Курсы',
           }));
 
+        const staffResults = staffUsers
+          .filter((staffUser) => {
+            const fullName = `${staffUser.second_name} ${staffUser.first_name} ${staffUser.patronymic ?? ''}`.trim();
+            const haystack = `${fullName} ${staffUser.email} ${staffUser.role?.name ?? ''}`.toLowerCase();
+            return haystack.includes(term);
+          })
+          .slice(0, 6)
+          .map((staffUser) => ({
+            id: `staff-${staffUser.id}`,
+            label: `${staffUser.second_name} ${staffUser.first_name} ${staffUser.patronymic ?? ''}`.trim(),
+            hint: `${staffUser.role?.name ?? (isEn ? 'Employee' : 'Сотрудник')} • ${staffUser.email}`,
+            href: `/staff/${staffUser.id}`,
+            section: isEn ? 'Team' : 'Команда',
+          }));
+
         const dealResults = deals
           .filter((deal) => `${deal.stage} ${deal.status}`.toLowerCase().includes(term))
           .slice(0, 4)
@@ -245,13 +293,14 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           ...lessonResults,
           ...groupResults,
           ...courseResults,
+          ...staffResults,
           ...dealResults,
           ...taskResults,
         ]);
       } catch (error) {
         console.error(error);
         if (!isCancelled) {
-          setSearchError('Ошибка поиска. Попробуйте еще раз.');
+          setSearchError(isEn ? 'Search error. Try again.' : 'Ошибка поиска. Попробуйте еще раз.');
           setSearchResults([]);
         }
       } finally {
@@ -265,12 +314,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
       isCancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [isTeacher, pageResults, searchQuery, user.id]);
+  }, [isEn, isTeacher, pageResults, searchQuery, user.id]);
 
   return (
     <header className={`${styles.header} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
       <div className={styles.leftSection}>
-        <button className={styles.sidebarToggle} onClick={toggleSidebar} aria-label="Toggle sidebar">
+        <button className={styles.sidebarToggle} onClick={toggleSidebar} aria-label={isEn ? 'Toggle sidebar' : 'Свернуть/развернуть меню'}>
           {isMobile ? (isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />) : isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
 
@@ -278,7 +327,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           <Search size={18} className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={isEn ? 'Search...' : 'Поиск...'}
             className={styles.searchInput}
             value={searchQuery}
             onFocus={() => setIsSearchOpen(true)}
@@ -290,13 +339,13 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           {isSearchOpen && (
             <div className={styles.searchPanel}>
               {searchQuery.trim().length < 2 ? (
-                <p className={styles.searchHint}>Введите минимум 2 символа для поиска по системе.</p>
+                <p className={styles.searchHint}>{isEn ? 'Type at least 2 characters to search.' : 'Введите минимум 2 символа для поиска по системе.'}</p>
               ) : isSearchLoading ? (
-                <p className={styles.searchHint}>Поиск...</p>
+                <p className={styles.searchHint}>{isEn ? 'Searching...' : 'Поиск...'}</p>
               ) : searchError ? (
                 <p className={styles.searchError}>{searchError}</p>
               ) : searchResults.length === 0 ? (
-                <p className={styles.searchHint}>Ничего не найдено.</p>
+                <p className={styles.searchHint}>{isEn ? 'No results found.' : 'Ничего не найдено.'}</p>
               ) : (
                 <div className={styles.searchResults}>
                   {searchResults.slice(0, 20).map((item) => (
@@ -331,11 +380,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
             onClick={() => {
               const nextOpen = !isNotificationsOpen;
               setIsNotificationsOpen(nextOpen);
-              if (nextOpen) {
+              if (nextOpen && teacherSettings.autoMarkNotificationsRead) {
                 markAllAsRead();
               }
             }}
-            aria-label="Открыть уведомления"
+            aria-label={isEn ? 'Open notifications' : 'Открыть уведомления'}
           >
             <Bell size={20} />
             {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
@@ -344,15 +393,15 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           {isNotificationsOpen && (
             <div className={styles.notificationsPanel}>
               <div className={styles.notificationsHeader}>
-                <strong>Уведомления</strong>
+                <strong>{isEn ? 'Notifications' : 'Уведомления'}</strong>
                 <button type="button" className={styles.linkButton} onClick={markAllAsRead}>
-                  Прочитать все
+                  {isEn ? 'Mark all as read' : 'Прочитать все'}
                 </button>
               </div>
 
               <div className={styles.notificationsList}>
                 {notifications.length === 0 ? (
-                  <p className={styles.notificationsEmpty}>Пока уведомлений нет</p>
+                  <p className={styles.notificationsEmpty}>{isEn ? 'No notifications yet' : 'Пока уведомлений нет'}</p>
                 ) : (
                   notifications.slice(0, 50).map((item) => (
                     <button
@@ -386,10 +435,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
           type="button"
           className={styles.userMenu}
           onClick={() => navigate('/account')}
-          aria-label="Открыть профиль"
+          aria-label={isEn ? 'Open profile' : 'Открыть профиль'}
         >
           <div className={styles.avatar}>
-            <User size={24} />
+            {avatarImage ? <img src={avatarImage} alt="Аватар" /> : <User size={24} />}
           </div>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{user.second_name} {user.first_name}</span>

@@ -1,26 +1,41 @@
 .lesson-form-page {
-  background: #ffffff;
+  --surface: #ffffff;
+  --surface-soft: color-mix(in srgb, var(--primary-mute) 24%, #ffffff);
+  --border: color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  --muted: var(--text-dark-mute);
+  --title: var(--text-dark);
+  background: var(--surface);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--container-box-shadow-default);
   width: 100%;
 }
 
 .lesson-form-page h1 {
   margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
 .lesson-form-heading {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lesson-page-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 
 .lesson-back-btn {
-  border: 1px solid #d6d9df;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #f8fafc;
-  color: #243240;
+  background: var(--surface-soft);
+  color: var(--text-dark);
   padding: 7px 12px;
   font: inherit;
   font-weight: 600;
@@ -29,8 +44,73 @@
 }
 
 .lesson-back-btn:hover {
-  border-color: #b7c2d0;
-  background: #eef2f7;
+  border-color: color-mix(in srgb, var(--primary) 34%, #bcc9d7);
+  background: color-mix(in srgb, var(--primary-mute) 35%, #eef3f8);
+}
+
+.lesson-edit-toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, #c3d1df);
+  border-radius: 8px;
+  background: #ffffff;
+  color: color-mix(in srgb, var(--text-dark) 88%, #415468);
+  padding: 7px 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lesson-edit-toggle:hover {
+  background: color-mix(in srgb, var(--primary-mute) 24%, #ffffff);
+}
+
+.lesson-edit-toggle--active {
+  border-color: color-mix(in srgb, var(--primary) 58%, #7f98b0);
+  background: color-mix(in srgb, var(--primary-mute) 34%, #ffffff);
+  color: color-mix(in srgb, var(--primary) 80%, #243749);
+}
+
+.lesson-edit-tabs-panel {
+  margin: 0 0 10px;
+}
+
+.lesson-edit-tabs {
+  display: inline-flex;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #ced9e5);
+  border-radius: 10px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--primary-mute) 16%, #f4f8fc);
+  gap: 6px;
+}
+
+.lesson-edit-tab {
+  flex: 1 1 0;
+  border: 1px solid color-mix(in srgb, var(--text-dark-mute) 24%, #d0dbe7);
+  border-radius: 8px;
+  background: #ffffff;
+  color: color-mix(in srgb, var(--text-dark) 88%, #415468);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lesson-edit-tab:hover {
+  border-color: color-mix(in srgb, var(--primary) 34%, #afc2d6);
+  background: color-mix(in srgb, var(--primary-mute) 24%, #ffffff);
+}
+
+.lesson-edit-tab--active {
+  border-color: color-mix(in srgb, var(--primary) 72%, #4f677c);
+  background: var(--primary-gradient);
+  color: #ffffff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 52%, #ffffff);
 }
 
 .lesson-form-subtitle {
@@ -46,46 +126,92 @@
 }
 
 .lesson-meta-chip {
-  border: 1px solid #dbe7f5;
+  border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 9px;
-  font-size: 12px;
-  color: #355d85;
-  background: #f2f7ff;
-  font-weight: 700;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--primary) 74%, #2d4257);
+  background: color-mix(in srgb, var(--primary-mute) 28%, #ffffff);
+  font-weight: 600;
 }
 
 .lesson-form-error {
   margin-bottom: 12px;
-  background: #ffe7e7;
+  background: color-mix(in srgb, #d95061 14%, #ffffff);
   color: #861313;
   border-radius: 8px;
   padding: 10px;
 }
 
-.lesson-create-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.lesson-create-tabs-panel {
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, #d4dee8);
+  border-radius: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-mute) 24%, #ffffff) 0%, #ffffff 100%);
+  padding: 10px;
   margin-bottom: 12px;
 }
 
+.lesson-create-tabs-hint {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.lesson-create-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, #d2dce7);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-mute) 12%, #f4f7fb);
+}
+
 .lesson-create-tab {
-  border: 1px solid #d6d9df;
-  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--text-dark-mute) 22%, #d5dde7);
+  border-radius: 8px;
   background: #ffffff;
-  color: #334155;
-  padding: 8px 12px;
+  color: color-mix(in srgb, var(--text-dark) 86%, #4a5b6c);
+  padding: 9px 13px;
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  flex: 1 1 180px;
+  min-width: 0;
+  transition: background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.lesson-create-tab:hover {
+  background: color-mix(in srgb, var(--primary-mute) 24%, #ffffff);
+  border-color: color-mix(in srgb, var(--primary) 34%, #afc2d6);
+  color: color-mix(in srgb, var(--text-dark) 92%, #2e4052);
 }
 
 .lesson-create-tab--active {
-  border-color: #1264a3;
-  background: #eaf4ff;
-  color: #1264a3;
+  border-color: color-mix(in srgb, var(--primary) 72%, #4f677c);
+  background: var(--primary-gradient);
+  color: #ffffff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 52%, #ffffff);
+}
+
+.lesson-create-tab--active:hover {
+  border-color: color-mix(in srgb, var(--primary) 72%, #4f677c);
+  background: var(--primary-gradient);
+  color: #ffffff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 58%, #ffffff);
+}
+
+.lesson-create-tab--active:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-shadow-hover) 65%, #ffffff);
+  outline-offset: 1px;
+}
+
+.lesson-create-tab:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 70%, #ffffff);
+  outline-offset: 1px;
 }
 
 .lesson-form {
@@ -93,37 +219,87 @@
   gap: 12px;
 }
 
+.lesson-form-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lesson-form-fieldset:disabled {
+  opacity: 0.72;
+}
+
 .lesson-form-section {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--primary-mute) 12%, #ffffff) 100%);
   padding: 14px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--primary-shadow) 16%, #ffffff);
 }
 
 .lesson-form-section h2 {
   margin: 0;
-  font-size: 17px;
-  color: #1e293b;
+  font-size: 15px;
+  color: var(--title);
+  padding-bottom: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-mute) 45%, #dbe4ee);
+  font-weight: 600;
 }
 
 .lesson-form label {
   display: grid;
   gap: 6px;
   font-weight: 500;
+  color: var(--text-dark);
+  font-size: 12px;
+  letter-spacing: 0.01em;
 }
 
 .lesson-form input:not([type='checkbox']):not([type='radio']),
 .lesson-form textarea,
 .lesson-form select {
-  border: 1px solid #d6d9df;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px 12px;
   font: inherit;
+  font-size: 14px;
+  color: var(--text-dark);
+  background: #ffffff;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+}
+
+.lesson-form-section > label:not(.lesson-form-checkbox),
+.lesson-form-row > label {
+  border: 1px solid color-mix(in srgb, var(--primary-mute) 42%, #d7e2ec);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--primary-mute) 12%, #ffffff) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+}
+
+.lesson-form-section > label:not(.lesson-form-checkbox):focus-within,
+.lesson-form-row > label:focus-within {
+  border-color: color-mix(in srgb, var(--primary) 46%, #a9bac9);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 36%, #ffffff);
+  background: #ffffff;
+}
+
+.lesson-form-section > label:not(.lesson-form-checkbox) > input,
+.lesson-form-section > label:not(.lesson-form-checkbox) > textarea,
+.lesson-form-section > label:not(.lesson-form-checkbox) > select,
+.lesson-form-row > label > input,
+.lesson-form-row > label > textarea,
+.lesson-form-row > label > select {
+  margin-top: 2px;
 }
 
 .lesson-form select {
@@ -144,10 +320,18 @@
   resize: vertical;
 }
 
+.lesson-form input:not([type='checkbox']):not([type='radio']):focus,
+.lesson-form textarea:focus,
+.lesson-form select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 50%, #9db2c5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 42%, #ffffff);
+}
+
 .lesson-form-hint {
   margin: 0;
-  font-size: 12px;
-  color: #64748b;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .lesson-form-row {
@@ -165,43 +349,44 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  color: #425466;
+  color: color-mix(in srgb, var(--text-dark) 82%, #4d5f71);
 }
 
 .duration-actions {
   display: flex;
   gap: 8px;
   padding: 3px;
-  border: 1px solid #d9e0ea;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: #f8fafc;
+  background: var(--surface-soft);
 }
 
 .duration-chip {
-  border: 1px solid #d6d9df;
+  border: 1px solid var(--border);
   border-radius: 999px;
   padding: 7px 11px;
-  background: #ffffff;
-  color: #334155;
+  background: var(--surface);
+  color: var(--text-dark);
   font-weight: 500;
+  font-size: 12px;
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .duration-chip:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #1e293b;
+  background: var(--surface-soft);
+  border-color: color-mix(in srgb, var(--primary) 28%, #c8d4e0);
+  color: var(--text-dark);
 }
 
 .duration-chip--active {
-  background: #e8f1fb;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: color-mix(in srgb, var(--primary-mute) 36%, #ffffff);
+  border-color: color-mix(in srgb, var(--primary) 46%, #9baaba);
+  color: var(--text-dark);
 }
 
 .duration-chip:focus-visible {
-  outline: 2px solid #94a3b8;
+  outline: 2px solid color-mix(in srgb, var(--primary) 52%, #99a8b8);
   outline-offset: 2px;
 }
 
@@ -213,8 +398,8 @@
 }
 
 .lesson-form-checkbox-panel {
-  background: #f8fafc;
-  border: 1px solid #dfe7f2;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
 }
@@ -228,10 +413,10 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  border: 1px solid #dfe7f2;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
-  background: #f8fafc;
+  background: var(--surface-soft);
   cursor: pointer;
   min-width: 0;
 }
@@ -245,8 +430,8 @@
 }
 
 .delete-scope-item.active {
-  border-color: #1264a3;
-  background: #eef6ff;
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary-mute) 32%, #ffffff);
 }
 
 .delete-scope-item.disabled {
@@ -264,8 +449,8 @@
   position: sticky;
   bottom: 10px;
   z-index: 20;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid #e2e8f0;
+  background: color-mix(in srgb, #ffffff 92%, var(--primary-mute));
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px;
   backdrop-filter: blur(2px);
@@ -279,14 +464,14 @@
   border-radius: 8px;
   padding: 10px 14px;
   color: #fff;
-  background: var(--primary);
+  background: var(--primary-gradient);
   cursor: pointer;
 }
 
 .lesson-form-actions button.secondary,
 .attendance-actions button.secondary {
-  background: #e7ebf1;
-  color: #243240;
+  background: var(--surface-soft);
+  color: var(--text-dark);
 }
 
 .lesson-form-actions button.danger {
@@ -302,7 +487,14 @@
 .attendance-section {
   margin-top: 24px;
   padding-top: 18px;
-  border-top: 1px solid #e6e9ef;
+  border-top: 1px solid var(--border);
+}
+
+.lesson-form-page > .attendance-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  margin-bottom: 16px;
 }
 
 .attendance-header-row {
@@ -325,8 +517,8 @@
 }
 
 .attendance-sync {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .attendance-sync--idle,
@@ -335,7 +527,7 @@
 }
 
 .attendance-sync--saving {
-  color: #1264a3;
+  color: var(--primary);
 }
 
 .attendance-sync--error {
@@ -352,10 +544,10 @@
   grid-template-columns: minmax(250px, 1fr) 2fr;
   gap: 16px;
   align-items: stretch;
-  border: 1px solid #d9e0ea;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .attendance-item--present {
@@ -372,12 +564,13 @@
 
 .attendance-item h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .attendance-item p {
   margin: 2px 0 0;
-  color: #6b7280;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -392,7 +585,7 @@
   margin-top: 6px;
   border-radius: 999px;
   padding: 3px 8px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -412,30 +605,30 @@
 }
 
 .attendance-student-link {
-  color: #0f172a;
+  color: var(--text-dark);
   text-decoration: none;
 }
 
 .attendance-student-link:hover {
-  color: #1264a3;
+  color: var(--primary);
   text-decoration: underline;
 }
 
 .attendance-select,
 .attendance-comment-input {
-  border: 1px solid #d6d9df;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 9px 12px;
   font: inherit;
-  background: #fff;
+  background: var(--surface);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .attendance-select:focus,
 .attendance-comment-input:focus {
   outline: none;
-  border-color: #1264a3;
-  box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 56%, #ffffff);
 }
 
 .attendance-controls {
@@ -453,9 +646,9 @@
 }
 
 .attendance-field > span {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 600;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .attendance-hedgehogs-field input {
@@ -480,7 +673,7 @@
   display: grid;
   gap: 6px;
   font-size: 13px;
-  color: #334155;
+  color: var(--text-dark);
 }
 
 .attendance-makeup-completed {

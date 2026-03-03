@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import type { User } from '../../types/crm.types';
+import { loadTeacherSettings } from '../../utils/teacherSettings';
 import './Notifications.css';
 
 export type NotifyType = 'success' | 'error' | 'info';
@@ -27,7 +29,21 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [toastIds, setToastIds] = useState<number[]>([]);
 
+  const getCurrentUser = (): User | null => {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as User;
+    } catch {
+      return null;
+    }
+  };
+
   const notify = useCallback((type: NotifyType, title: string, message: string, options?: { href?: string }) => {
+    const user = getCurrentUser();
+    const settings = loadTeacherSettings(user);
+    const toastLifetime = settings.toastDurationMs;
+    const maxVisibleToasts = settings.maxVisibleToasts;
     const id = Date.now() + Math.floor(Math.random() * 1000);
     setNotifications((prev) => [
       {
@@ -41,11 +57,11 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
       },
       ...prev,
     ]);
-    setToastIds((prev) => [id, ...prev]);
+    setToastIds((prev) => [id, ...prev].slice(0, maxVisibleToasts));
 
     setTimeout(() => {
       setToastIds((prev) => prev.filter((toastId) => toastId !== id));
-    }, 4000);
+    }, toastLifetime);
   }, []);
 
   const dismissToast = useCallback((id: number) => {

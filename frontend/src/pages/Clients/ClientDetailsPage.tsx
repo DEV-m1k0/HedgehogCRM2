@@ -21,6 +21,19 @@ const prettyDate = (value: string | null): string => {
   return date.toLocaleDateString();
 };
 
+const getAge = (value: string | null): number | null => {
+  if (!value) return null;
+  const birthDate = new Date(value);
+  if (Number.isNaN(birthDate.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+};
+
 const getMakeupStatusLabel = (item: StudentMakeup): string => {
   if (item.makeup_completed) return 'Проведена';
   if (item.makeup_lesson_at) return 'Назначена';
@@ -78,6 +91,7 @@ export const ClientDetailsPage = () => {
   }
 
   const fullName = `${client.second_name} ${client.first_name}${client.patronymic ? ` ${client.patronymic}` : ''}`;
+  const age = getAge(client.date_of_birth);
   const attendanceRate = stats?.attendance_rate ?? 0;
   const attendanceState = attendanceRate >= 80 ? 'Высокая' : attendanceRate >= 60 ? 'Средняя' : 'Низкая';
 
@@ -145,6 +159,10 @@ export const ClientDetailsPage = () => {
         <article className={styles.card}>
           <h2>Профиль ученика</h2>
           <div className={styles.field}>
+            <span>Возраст</span>
+            <strong>{age !== null ? `${age} лет` : 'не указан'}</strong>
+          </div>
+          <div className={styles.field}>
             <span>Теги</span>
             <strong>{client.tags ?? 'нет тегов'}</strong>
           </div>
@@ -181,7 +199,7 @@ export const ClientDetailsPage = () => {
           {!stats ? (
             <p className={styles.subtle}>Статистика пока недоступна.</p>
           ) : (
-            <>
+            <div className={styles.statsFields}>
               <div className={styles.field}><span>Всего занятий</span><strong>{stats.total_lessons}</strong></div>
               <div className={styles.field}><span>Посещено</span><strong>{stats.present_count}</strong></div>
               <div className={styles.field}><span>Опозданий</span><strong>{stats.late_count}</strong></div>
@@ -191,7 +209,7 @@ export const ClientDetailsPage = () => {
               <div className={styles.field}><span>Среднее хечхогов/занятие</span><strong>{stats.average_hedgehogs}</strong></div>
               <div className={styles.field}><span>Назначено отработок</span><strong>{stats.makeups_scheduled}</strong></div>
               <div className={styles.field}><span>Проведено отработок</span><strong>{stats.makeups_completed}</strong></div>
-            </>
+            </div>
           )}
         </article>
       </div>

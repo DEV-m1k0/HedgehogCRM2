@@ -16,6 +16,7 @@ from app.schemas import (
     LessonUpdate,
     MakeupAssignIn,
     MakeupCalendarEventRead,
+    MakeupCompletionUpdateIn,
     MakeupItemRead,
 )
 
@@ -108,6 +109,31 @@ def _resolve_cancel_marker_id(db: Session, lesson: Lesson, current_user: User) -
         if teacher and _is_teacher(teacher):
             return teacher.id
     return None
+
+
+def _makeup_item_from_entities(
+    *,
+    attendance: Attendance,
+    lesson: Lesson,
+    group: StudyGroup,
+    client: Client,
+) -> MakeupItemRead:
+    return MakeupItemRead(
+        attendance_id=attendance.id,
+        client_id=client.id,
+        client_full_name=f"{client.second_name} {client.first_name}",
+        lesson_id=lesson.id,
+        lesson_topic=lesson.topic,
+        lesson_start_at=lesson.start_at,
+        group_id=group.id,
+        group_name=group.name,
+        absent_marked_by_user_id=attendance.absent_marked_by_user_id,
+        makeup_lesson_at=attendance.makeup_lesson_at,
+        makeup_teacher_id=attendance.makeup_teacher_id,
+        makeup_group_id=attendance.makeup_group_id,
+        makeup_comment=attendance.makeup_comment,
+        makeup_completed=attendance.makeup_completed,
+    )
 
 
 def _sync_cancelled_attendance(
@@ -216,6 +242,8 @@ def create_lesson(
         is_cancelled=payload.is_cancelled,
         is_recurring_weekly=payload.is_recurring_weekly,
         recurrence_group_id=recurrence_group_id,
+        reminder_minutes_before=payload.reminder_minutes_before,
+        reminder_sent_at=None,
     )
     _sync_lesson_conducted_state(lesson)
     db.add(lesson)
@@ -237,6 +265,8 @@ def create_lesson(
                 is_cancelled=payload.is_cancelled,
                 is_recurring_weekly=True,
                 recurrence_group_id=recurrence_group_id,
+                reminder_minutes_before=payload.reminder_minutes_before,
+                reminder_sent_at=None,
             )
             _sync_lesson_conducted_state(recurring_lesson)
             db.add(recurring_lesson)
@@ -303,6 +333,7 @@ def update_lesson(
     has_start_at = "start_at" in values and values["start_at"] is not None
     has_end_at = "end_at" in values and values["end_at"] is not None
     has_cancelled = "is_cancelled" in values and values["is_cancelled"] is not None
+    has_reminder_change = "reminder_minutes_before" in values
     start_delta = values["start_at"] - original_start if has_start_at else None
     end_delta = values["end_at"] - original_end if has_end_at else None
 
@@ -320,6 +351,8 @@ def update_lesson(
 
         if _to_utc_naive(target.end_at) <= _to_utc_naive(target.start_at):
             raise HTTPException(status_code=400, detail="Время окончания должно быть позже времени начала")
+        if has_start_at or has_reminder_change:
+            target.reminder_sent_at = None
         _sync_lesson_conducted_state(target)
 
         if has_cancelled:
@@ -544,24 +577,7 @@ def list_makeups(
         teacher_marked_absence = bool(absent_marked_by_user and _is_teacher(absent_marked_by_user))
         if not teacher_marked_absence and not attendance.auto_marked_cancelled:
             continue
-        result.append(
-            MakeupItemRead(
-                attendance_id=attendance.id,
-                client_id=client.id,
-                client_full_name=f"{client.second_name} {client.first_name}",
-                lesson_id=lesson.id,
-                lesson_topic=lesson.topic,
-                lesson_start_at=lesson.start_at,
-                group_id=group.id,
-                group_name=group.name,
-                absent_marked_by_user_id=attendance.absent_marked_by_user_id,
-                makeup_lesson_at=attendance.makeup_lesson_at,
-                makeup_teacher_id=attendance.makeup_teacher_id,
-                makeup_group_id=attendance.makeup_group_id,
-                makeup_comment=attendance.makeup_comment,
-                makeup_completed=attendance.makeup_completed,
-            )
-        )
+        result.append(_makeup_item_from_entities(attendance=attendance, lesson=lesson, group=group, client=client))
     return result
 
 
@@ -612,22 +628,92 @@ def assign_makeup(
     if not group or not client:
         raise HTTPException(status_code=404, detail="Связанные данные не найдены")
 
-    return MakeupItemRead(
-        attendance_id=attendance.id,
-        client_id=client.id,
-        client_full_name=f"{client.second_name} {client.first_name}",
-        lesson_id=lesson.id,
-        lesson_topic=lesson.topic,
-        lesson_start_at=lesson.start_at,
-        group_id=group.id,
-        group_name=group.name,
-        absent_marked_by_user_id=attendance.absent_marked_by_user_id,
-        makeup_lesson_at=attendance.makeup_lesson_at,
-        makeup_teacher_id=attendance.makeup_teacher_id,
-        makeup_group_id=attendance.makeup_group_id,
-        makeup_comment=attendance.makeup_comment,
-        makeup_completed=attendance.makeup_completed,
+    return _makeup_item_from_entities(attendance=attendance, lesson=lesson, group=group, client=client)
+
+
+@router.get("/makeups/session", response_model=list[MakeupItemRead])
+def list_makeup_session(
+    makeup_group_id: int | None = Query(default=None),
+    makeup_lesson_at: datetime | None = Query(default=None),
+    teacher_id: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[MakeupItemRead]:
+    if makeup_group_id is None and makeup_lesson_at is None:
+        raise HTTPException(status_code=400, detail="Нужно передать makeup_group_id или makeup_lesson_at")
+
+    if not (_is_teacher(current_user) or _is_manager_or_admin(current_user)):
+        raise HTTPException(status_code=403, detail="Недостаточно прав для просмотра отработок")
+
+    effective_teacher_id = teacher_id
+    if _is_teacher(current_user):
+        effective_teacher_id = current_user.id
+
+    query = (
+        db.query(Attendance, Lesson, StudyGroup, Client)
+        .join(Lesson, Lesson.id == Attendance.lesson_id)
+        .join(StudyGroup, StudyGroup.id == Lesson.group_id)
+        .join(Client, Client.id == Attendance.client_id)
+        .filter(
+            Attendance.status == "absent",
+            Attendance.makeup_lesson_at.is_not(None),
+            Attendance.makeup_teacher_id.is_not(None),
+            Lesson.archived_at.is_(None),
+            StudyGroup.archived_at.is_(None),
+            Client.archived_at.is_(None),
+        )
     )
+
+    if makeup_group_id is not None:
+        query = query.filter(Attendance.makeup_group_id == makeup_group_id)
+    elif makeup_lesson_at is not None:
+        query = query.filter(Attendance.makeup_lesson_at == _to_utc_naive(makeup_lesson_at))
+
+    if effective_teacher_id is not None:
+        query = query.filter(Attendance.makeup_teacher_id == effective_teacher_id)
+
+    rows = query.order_by(Client.second_name.asc(), Client.first_name.asc(), Attendance.id.asc()).all()
+    return [
+        _makeup_item_from_entities(attendance=attendance, lesson=lesson, group=group, client=client)
+        for attendance, lesson, group, client in rows
+    ]
+
+
+@router.patch("/makeups/{attendance_id}/completion", response_model=MakeupItemRead)
+def update_makeup_completion(
+    attendance_id: int,
+    payload: MakeupCompletionUpdateIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> MakeupItemRead:
+    if not (_is_teacher(current_user) or _is_manager_or_admin(current_user)):
+        raise HTTPException(status_code=403, detail="Недостаточно прав для изменения отработки")
+
+    attendance = db.get(Attendance, attendance_id)
+    if not attendance:
+        raise HTTPException(status_code=404, detail="Посещаемость не найдена")
+    if attendance.status != "absent":
+        raise HTTPException(status_code=400, detail="Отработка доступна только для пропуска")
+    if attendance.makeup_lesson_at is None or attendance.makeup_teacher_id is None:
+        raise HTTPException(status_code=400, detail="Для записи не назначена отработка")
+
+    if _is_teacher(current_user) and attendance.makeup_teacher_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Можно изменять только свои отработки")
+
+    attendance.makeup_completed = payload.makeup_completed
+    attendance.makeup_comment = payload.makeup_comment
+    db.commit()
+    db.refresh(attendance)
+
+    lesson = db.get(Lesson, attendance.lesson_id)
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Занятие не найдено")
+    group = db.get(StudyGroup, lesson.group_id)
+    client = db.get(Client, attendance.client_id)
+    if not group or not client:
+        raise HTTPException(status_code=404, detail="Связанные данные не найдены")
+
+    return _makeup_item_from_entities(attendance=attendance, lesson=lesson, group=group, client=client)
 
 
 @router.get("/makeups-events", response_model=list[MakeupCalendarEventRead])

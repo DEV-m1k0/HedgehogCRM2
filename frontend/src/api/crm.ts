@@ -37,6 +37,25 @@ export const authApi = {
 
 export const metaApi = {
   users: () => api.get<User[]>('/users'),
+  me: () => api.get<User>('/users/me'),
+  updateMe: (payload: {
+    email?: string | null;
+    first_name?: string | null;
+    second_name?: string | null;
+    patronymic?: string | null;
+    phone?: string | null;
+    vk_contact?: string | null;
+    telegram_contact?: string | null;
+    whatsapp_contact?: string | null;
+    max_contact?: string | null;
+  }) => api.patch<User>('/users/me', payload),
+  uploadMyAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<User>('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const clientsApi = {
@@ -56,7 +75,7 @@ export const clientsApi = {
     parent_email?: string;
     tags?: string;
   }) => api.post<Client>('/clients', payload),
-  update: (id: number, payload: Partial<Pick<Client, 'first_name' | 'second_name' | 'patronymic' | 'parent_full_name' | 'parent_phone' | 'parent_email' | 'tags'>>) =>
+  update: (id: number, payload: Partial<Pick<Client, 'first_name' | 'second_name' | 'patronymic' | 'date_of_birth' | 'parent_full_name' | 'parent_phone' | 'parent_email' | 'tags'>>) =>
     api.patch<Client>(`/clients/${id}`, payload),
   remove: (id: number) => api.delete(`/clients/${id}`),
 };
@@ -106,6 +125,7 @@ export const scheduleApi = {
     is_cancelled?: boolean;
     is_recurring_weekly?: boolean;
     recurrence_until?: string;
+    reminder_minutes_before?: number | null;
   }) => api.post<Lesson>('/schedule/lessons', payload),
   updateLesson: (id: number, payload: {
     group_id?: number;
@@ -117,11 +137,14 @@ export const scheduleApi = {
     comment?: string | null;
     is_cancelled?: boolean;
     is_recurring_weekly?: boolean;
+    reminder_minutes_before?: number | null;
     apply_to_future?: boolean;
   }) => api.put<Lesson>(`/schedule/lessons/${id}`, payload),
   deleteLesson: (id: number, scope: 'single' | 'future' | 'all' = 'single') =>
     api.delete(`/schedule/lessons/${id}`, { params: { delete_scope: scope } }),
   listMakeups: (includeCompleted = false) => api.get<MakeupItem[]>('/schedule/makeups', { params: { include_completed: includeCompleted } }),
+  makeupSession: (params: { makeup_group_id?: number; makeup_lesson_at?: string; teacher_id?: number }) =>
+    api.get<MakeupItem[]>('/schedule/makeups/session', { params }),
   makeupCalendar: (teacherId?: number, includeCompleted = true) =>
     api.get<MakeupCalendarEvent[]>('/schedule/makeups-events', { params: { teacher_id: teacherId, include_completed: includeCompleted } }),
   assignMakeup: (attendanceId: number, payload: {
@@ -130,6 +153,8 @@ export const scheduleApi = {
     makeup_comment?: string | null;
     makeup_completed?: boolean;
   }) => api.patch<MakeupItem>(`/schedule/makeups/${attendanceId}`, payload),
+  completeMakeup: (attendanceId: number, payload: { makeup_completed: boolean; makeup_comment?: string | null }) =>
+    api.patch<MakeupItem>(`/schedule/makeups/${attendanceId}/completion`, payload),
 };
 
 export const dealsApi = {

@@ -4,6 +4,7 @@ import { clientsApi, coursesApi, groupsApi, metaApi, scheduleApi } from '../../a
 import type { AttendanceRecord, AttendanceStatus, Client, Course, Group, MakeupItem, User } from '../../types/crm.types';
 import ConfirmationModal from './Components/ConfirmationModal';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import './LessonFormPage.css';
 
 interface LessonFormState {
@@ -24,6 +25,11 @@ interface AttendanceDraft {
   status: AttendanceStatus;
   comment: string;
   hedgehogs: number;
+}
+
+interface MakeupSessionDraft {
+  makeup_completed: boolean;
+  makeup_comment: string;
 }
 
 type DeleteScope = 'single' | 'future' | 'all';
@@ -80,6 +86,7 @@ const statusText: Record<AttendanceStatus, string> = {
 
 export const LessonFormPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const { lessonId } = useParams();
   const isEditMode = Boolean(lessonId);
   const navigate = useNavigate();
@@ -92,11 +99,15 @@ export const LessonFormPage = () => {
   const [makeupCandidates, setMakeupCandidates] = useState<MakeupItem[]>([]);
   const [makeupSelection, setMakeupSelection] = useState<Record<number, boolean>>({});
   const [makeupQuery, setMakeupQuery] = useState('');
+  const [makeupSessionItems, setMakeupSessionItems] = useState<MakeupItem[]>([]);
+  const [makeupSessionDrafts, setMakeupSessionDrafts] = useState<Record<number, MakeupSessionDraft>>({});
   const [students, setStudents] = useState<Client[]>([]);
   const [attendance, setAttendance] = useState<Record<number, AttendanceDraft>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isLessonEditEnabled, setIsLessonEditEnabled] = useState<boolean>(() => !isEditMode);
+  const [editTab, setEditTab] = useState<'attendance' | 'details'>('attendance');
   const [applyToFuture, setApplyToFuture] = useState(false);
   const [canApplyToFuture, setCanApplyToFuture] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -116,9 +127,11 @@ export const LessonFormPage = () => {
 
   const defaultRange = getDefaultRange(searchParams.get('date'));
   const mode = searchParams.get('mode');
-  const initialCreateTab: CreateTab = mode === 'makeup' ? 'makeup' : 'group';
+  const canCreateMakeup = isManagerOrAdmin;
+  const initialCreateTab: CreateTab = mode === 'makeup' && canCreateMakeup ? 'makeup' : 'group';
   const [createTab, setCreateTab] = useState<CreateTab>(initialCreateTab);
   const isMakeupMode = !isEditMode && createTab === 'makeup';
+  const isMakeupAttendanceMode = !isEditMode && mode === 'makeup-attendance';
   const initialTeacherFilter = isTeacher ? String(currentUser?.id ?? '') : (searchParams.get('teacherId') ?? '');
   const [selectedTeacherFilter, setSelectedTeacherFilter] = useState<string>(initialTeacherFilter);
 
@@ -134,6 +147,7 @@ export const LessonFormPage = () => {
     is_recurring_weekly: false,
     recurrence_until: defaultRange.start_at.slice(0, 10),
   });
+  const isIndividualDirectCreate = !isEditMode && form.lesson_type === 'individual' && (isManagerOrAdmin || isTeacher);
 
   const teacherOptions = useMemo(
     () => users.filter((user) => user.role.name.toLowerCase() === 'преподаватель'),
@@ -180,16 +194,13 @@ export const LessonFormPage = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const requests: Promise<any>[] = [
+        const [groupsRes, coursesRes, usersRes, clientsRes, makeupsRes] = await Promise.all([
           groupsApi.list(),
           coursesApi.list(),
           metaApi.users(),
-          clientsApi.list(),
-        ];
-        if (isMakeupMode) {
-          requests.push(scheduleApi.listMakeups(false));
-        }
-        const [groupsRes, coursesRes, usersRes, clientsRes, makeupsRes] = await Promise.all(requests);
+          isTeacher ? clientsApi.myStudents() : clientsApi.list(),
+          isMakeupMode ? scheduleApi.listMakeups(false) : Promise.resolve({ data: [] as MakeupItem[] }),
+        ]);
 
         const groupItems = groupsRes.data as Group[];
         setGroups(groupItems);
@@ -221,7 +232,7 @@ export const LessonFormPage = () => {
         }
 
         if (isMakeupMode) {
-          const candidates = (makeupsRes?.data ?? []) as MakeupItem[];
+          const candidates = makeupsRes.data as MakeupItem[];
           setMakeupCandidates(candidates);
           setMakeupSelection((prev) => {
             const next: Record<number, boolean> = {};
@@ -230,6 +241,28 @@ export const LessonFormPage = () => {
             }
             return next;
           });
+        }
+
+        if (isMakeupAttendanceMode) {
+          const makeupGroupIdRaw = searchParams.get('makeupGroupId');
+          const makeupAt = searchParams.get('makeupAt');
+          const makeupGroupId = makeupGroupIdRaw ? Number(makeupGroupIdRaw) : undefined;
+          const teacherId = currentUser?.id;
+          const sessionRes = await scheduleApi.makeupSession({
+            makeup_group_id: Number.isInteger(makeupGroupId) && makeupGroupId && makeupGroupId > 0 ? makeupGroupId : undefined,
+            makeup_lesson_at: makeupAt || undefined,
+            teacher_id: teacherId,
+          });
+          const items = sessionRes.data;
+          setMakeupSessionItems(items);
+          const nextDrafts: Record<number, MakeupSessionDraft> = {};
+          for (const item of items) {
+            nextDrafts[item.attendance_id] = {
+              makeup_completed: item.makeup_completed,
+              makeup_comment: item.makeup_comment ?? '',
+            };
+          }
+          setMakeupSessionDrafts(nextDrafts);
         }
       } catch (requestError) {
         console.error(requestError);
@@ -240,7 +273,7 @@ export const LessonFormPage = () => {
     };
 
     load().catch(console.error);
-  }, [isEditMode, lessonId, isMakeupMode]);
+  }, [isEditMode, lessonId, isMakeupMode, isMakeupAttendanceMode, searchParams, currentUser?.id]);
 
   useEffect(() => {
     if (!canApplyToFuture && deleteScope !== 'single') {
@@ -415,6 +448,16 @@ export const LessonFormPage = () => {
   }, [makeupCandidates, makeupQuery, selectedTeacherFilter]);
 
   const validate = () => {
+    if (isMakeupAttendanceMode) {
+      if (!isTeacher) {
+        return 'Выставлять посещаемость отработки может только преподаватель';
+      }
+      if (makeupSessionItems.length === 0) {
+        return 'Нет учеников в выбранной отработке';
+      }
+      return null;
+    }
+
     if (isMakeupMode) {
       if (!isManagerOrAdmin) {
         return 'Назначать отработки может только менеджер или администратор';
@@ -435,8 +478,7 @@ export const LessonFormPage = () => {
 
     const missing: string[] = [];
 
-    const isIndividualManagerCreate = !isEditMode && isManagerOrAdmin && form.lesson_type === 'individual';
-    if (!isIndividualManagerCreate && !availableGroups.some((group) => group.id === form.group_id)) {
+    if (!isIndividualDirectCreate && !availableGroups.some((group) => group.id === form.group_id)) {
       missing.push('группа');
     }
     if (!isTeacher && isManager) {
@@ -445,10 +487,10 @@ export const LessonFormPage = () => {
         missing.push('преподаватель');
       }
     }
-    if (!isIndividualManagerCreate && !form.topic.trim()) {
+    if (!isIndividualDirectCreate && !form.topic.trim()) {
       missing.push('тема');
     }
-    if (isIndividualManagerCreate && !selectedIndividualStudentId) {
+    if (isIndividualDirectCreate && !selectedIndividualStudentId) {
       missing.push('ученик');
     }
     if (!form.start_at) {
@@ -473,7 +515,16 @@ export const LessonFormPage = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!window.confirm(isMakeupMode ? 'Назначить выбранные отработки?' : (isEditMode ? 'Сохранить изменения занятия?' : 'Создать новое занятие?'))) {
+    const submitMessage = isMakeupAttendanceMode
+      ? 'Сохранить посещаемость отработки?'
+      : isMakeupMode
+      ? 'Назначить выбранные отработки?'
+      : (isEditMode ? 'Сохранить изменения занятия?' : 'Создать новое занятие?');
+    if (!(await confirm({
+      title: isMakeupAttendanceMode ? 'Подтверждение сохранения' : (isEditMode ? 'Подтверждение изменения' : 'Подтверждение создания'),
+      message: submitMessage,
+      confirmText: isMakeupAttendanceMode ? 'Сохранить' : (isEditMode ? 'Сохранить' : 'Создать'),
+    }))) {
       return;
     }
     const validationError = validate();
@@ -485,6 +536,21 @@ export const LessonFormPage = () => {
     setError(null);
     setSubmitting(true);
     try {
+      if (isMakeupAttendanceMode) {
+        await Promise.all(
+          makeupSessionItems.map((item) => {
+            const draft = makeupSessionDrafts[item.attendance_id];
+            return scheduleApi.completeMakeup(item.attendance_id, {
+              makeup_completed: draft?.makeup_completed ?? item.makeup_completed,
+              makeup_comment: draft?.makeup_comment?.trim() || null,
+            });
+          }),
+        );
+        notify('success', 'Посещаемость сохранена', 'Данные по отработке обновлены.');
+        navigate('/calendar');
+        return;
+      }
+
       if (isMakeupMode) {
         const teacherId = Number(selectedTeacherFilter);
         const selectedIds = Object.entries(makeupSelection)
@@ -521,7 +587,7 @@ export const LessonFormPage = () => {
         });
         notify('success', 'Изменения сохранены', 'Данные занятия обновлены.', { href: `/calendar/${lessonId}/edit` });
       } else {
-        if (form.lesson_type === 'individual' && isManagerOrAdmin) {
+        if (form.lesson_type === 'individual' && (isManagerOrAdmin || isTeacher)) {
           const teacherId = Number(selectedTeacherFilter);
           const student = allStudents.find((item) => item.id === selectedIndividualStudentId) ?? null;
           if (!Number.isInteger(teacherId) || teacherId <= 0 || !student) {
@@ -638,6 +704,10 @@ export const LessonFormPage = () => {
     return <section className="lesson-form-page"><div className="lesson-form-error">Назначать отработки может только менеджер или администратор.</div></section>;
   }
 
+  if (isMakeupAttendanceMode && !isTeacher) {
+    return <section className="lesson-form-page"><div className="lesson-form-error">Этот режим доступен только преподавателю.</div></section>;
+  }
+
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
@@ -646,352 +716,140 @@ export const LessonFormPage = () => {
     navigate('/calendar');
   };
 
+  if (isMakeupAttendanceMode) {
+    return (
+      <section className="lesson-form-page">
+        <div className="lesson-page-toolbar">
+          <button type="button" className="lesson-back-btn" onClick={handleBack}>
+            Назад
+          </button>
+        </div>
+
+        <div className="lesson-form-heading">
+          <h1>Посещаемость отработки</h1>
+        </div>
+        <p className="lesson-form-subtitle">Отметьте посещение учеников, записанных на эту отработку.</p>
+        {error && <div className="lesson-form-error">{error}</div>}
+
+        {makeupSessionItems.length === 0 ? (
+          <div className="lesson-form-error">Для выбранной отработки пока нет записанных учеников.</div>
+        ) : (
+          <form id="lesson-form" className="lesson-form" onSubmit={handleSubmit}>
+            <section className="lesson-form-section">
+              <h2>Ученики</h2>
+              <div className="attendance-list">
+                {makeupSessionItems.map((item) => {
+                  const draft = makeupSessionDrafts[item.attendance_id] ?? {
+                    makeup_completed: item.makeup_completed,
+                    makeup_comment: item.makeup_comment ?? '',
+                  };
+                  return (
+                    <article
+                      key={item.attendance_id}
+                      className={`attendance-item attendance-item--${draft.makeup_completed ? 'present' : 'absent'}`}
+                    >
+                      <div className="attendance-student">
+                        <h3>
+                          <Link to={`/clients/${item.client_id}`} className="attendance-student-link">
+                            {item.client_full_name}
+                          </Link>
+                        </h3>
+                        <p>{item.group_name}</p>
+                        <span className={`attendance-badge ${draft.makeup_completed ? 'attendance-badge--present' : 'attendance-badge--absent'}`}>
+                          {draft.makeup_completed ? 'Отработал' : 'Не отработал'}
+                        </span>
+                      </div>
+
+                      <div className="attendance-controls">
+                        <label className="attendance-field">
+                          <span>Статус отработки</span>
+                          <select
+                            className="attendance-select"
+                            value={draft.makeup_completed ? 'done' : 'pending'}
+                            onChange={(e) => {
+                              const nextCompleted = e.target.value === 'done';
+                              setMakeupSessionDrafts((prev) => ({
+                                ...prev,
+                                [item.attendance_id]: { ...draft, makeup_completed: nextCompleted },
+                              }));
+                            }}
+                          >
+                            <option value="pending">Не отработал</option>
+                            <option value="done">Отработал</option>
+                          </select>
+                        </label>
+
+                        <label className="attendance-field">
+                          <span>Комментарий</span>
+                          <input
+                            className="attendance-comment-input"
+                            type="text"
+                            value={draft.makeup_comment}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setMakeupSessionDrafts((prev) => ({
+                                ...prev,
+                                [item.attendance_id]: { ...draft, makeup_comment: value },
+                              }));
+                            }}
+                            placeholder="Комментарий по отработке"
+                          />
+                        </label>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+
+            <div className="lesson-form-actions lesson-form-actions--sticky">
+              <button type="button" className="secondary" onClick={handleBack} disabled={submitting}>
+                Отмена
+              </button>
+              <button type="submit" disabled={submitting}>
+                Сохранить посещаемость
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section className="lesson-form-page">
-      <div className="lesson-form-heading">
+      <div className="lesson-page-toolbar">
         <button type="button" className="lesson-back-btn" onClick={handleBack}>
           Назад
         </button>
-        <h1>{isEditMode ? 'Редактирование занятия' : 'Добавление занятия'}</h1>
-      </div>
-      <p className="lesson-form-subtitle">
-        {isMakeupMode
-          ? 'Выберите преподавателя и учеников из пропусков, чтобы назначить сессию отработки.'
-          : isEditMode
-          ? 'Измените данные урока, посещаемость сохраняется автоматически.'
-          : 'После сохранения вы вернетесь на страницу календаря со всеми расписаниями.'}
-      </p>
-      <div className="lesson-meta">
-        {!isMakeupMode ? <span className="lesson-meta-chip">Группа: {selectedGroup?.name ?? '—'}</span> : null}
-        {!isMakeupMode ? <span className="lesson-meta-chip">Курс: {selectedCourseName}</span> : null}
-        <span className="lesson-meta-chip">Преподаватель: {selectedTeacherName}</span>
-        <span className="lesson-meta-chip">Тип: {isMakeupMode ? 'Отработка' : (form.lesson_type === 'individual' ? 'Индивидуальное занятие' : 'Групповое занятие')}</span>
       </div>
 
-      {error && <div className="lesson-form-error">{error}</div>}
-
-      {!isMakeupMode && availableGroups.length === 0 && <div className="lesson-form-error">Нет доступных групп для выбранного преподавателя.</div>}
-
-      {!isEditMode && isManagerOrAdmin ? (
-        <div className="lesson-create-tabs">
-          <button
-            type="button"
-            className={createTab === 'group' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
-            onClick={() => setCreateTab('group')}
-          >
-            Добавить групповое занятие
-          </button>
-          <button
-            type="button"
-            className={createTab === 'individual' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
-            onClick={() => setCreateTab('individual')}
-          >
-            Добавить индивидуальное занятие
-          </button>
-          <button
-            type="button"
-            className={createTab === 'makeup' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
-            onClick={() => setCreateTab('makeup')}
-          >
-            Добавить отработку
-          </button>
-        </div>
-      ) : null}
-
-      <form id="lesson-form" className="lesson-form" onSubmit={handleSubmit}>
-        {isMakeupMode ? (
-          <>
-            <section className="lesson-form-section">
-              <h2>Параметры отработки</h2>
-              <div className="lesson-form-row">
-                <label>
-                  Преподаватель
-                  <select value={selectedTeacherFilter} onChange={(e) => setSelectedTeacherFilter(e.target.value)}>
-                    <option value="">Выберите преподавателя</option>
-                    {teacherOptions.map((teacher) => (
-                      <option key={teacher.id} value={teacher.id}>
-                        {teacher.second_name} {teacher.first_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Дата и время отработки
-                  <input type="datetime-local" value={form.start_at} onChange={(e) => handleChange('start_at', e.target.value)} />
-                </label>
-              </div>
-              <label>
-                Комментарий для отработки
-                <input
-                  type="text"
-                  value={form.comment}
-                  onChange={(e) => handleChange('comment', e.target.value)}
-                  placeholder="Например: совместная отработка по пропускам"
-                />
-              </label>
-            </section>
-
-            <section className="lesson-form-section">
-              <h2>Ученики на отработку</h2>
-              <input
-                type="text"
-                value={makeupQuery}
-                onChange={(e) => setMakeupQuery(e.target.value)}
-                placeholder="Поиск: ученик, группа, тема пропуска"
-              />
-              {filteredMakeupCandidates.length === 0 ? (
-                <p className="lesson-form-subtitle">Нет доступных пропусков для назначения.</p>
-              ) : (
-                <div className="attendance-list">
-                  {filteredMakeupCandidates.map((item) => (
-                    <label key={item.attendance_id} className="delete-scope-item">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(makeupSelection[item.attendance_id])}
-                        onChange={(e) => setMakeupSelection((prev) => ({ ...prev, [item.attendance_id]: e.target.checked }))}
-                      />
-                      <span>
-                        {item.client_full_name} • {item.group_name} • {item.lesson_topic} • {new Date(item.lesson_start_at).toLocaleString()}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
-        ) : (
-          <>
-            <section className="lesson-form-section">
-          <h2>Основная информация</h2>
-          <div className="lesson-form-row">
-            <label>
-              Преподаватель
-              <select
-                value={selectedTeacherFilter}
-                onChange={(e) => setSelectedTeacherFilter(e.target.value)}
-                disabled={isTeacher}
-              >
-                {!isTeacher ? <option value="">Выберите преподавателя</option> : null}
-                {teacherOptions.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.second_name} {teacher.first_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {isEditMode || !isManagerOrAdmin ? (
-              <label>
-                Тип события
-                <select value={form.lesson_type} onChange={(e) => handleChange('lesson_type', e.target.value)}>
-                  <option value="group">Групповое занятие</option>
-                  <option value="individual">Индивидуальное занятие</option>
-                </select>
-              </label>
-            ) : null}
-
-            {!(isManagerOrAdmin && !isEditMode && form.lesson_type === 'individual') ? (
-              <label>
-                Группа
-                <select
-                  value={form.group_id}
-                  onChange={(e) => handleChange('group_id', Number(e.target.value))}
-                  disabled={availableGroups.length === 0}
-                >
-                  {availableGroups.length === 0 ? (
-                    <option value={0}>Нет доступных групп</option>
-                  ) : (
-                    availableGroups.map((group) => {
-                      const courseName = courseMap.get(group.course_id)?.name ?? 'Без курса';
-                      const teacher = group.teacher_id ? teacherMap.get(group.teacher_id) : null;
-                      const teacherLabel = teacher ? `${teacher.second_name} ${teacher.first_name}` : 'Не назначен';
-                      return (
-                        <option key={group.id} value={group.id}>
-                          {group.name} - {courseName} - {teacherLabel}
-                        </option>
-                      );
-                    })
-                  )}
-                </select>
-              </label>
-            ) : (
-              <label>
-                Ученик
-                <select value={selectedIndividualStudentId} onChange={(e) => setSelectedIndividualStudentId(Number(e.target.value))}>
-                  <option value={0}>Выберите ученика</option>
-                  {allStudents.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.second_name} {student.first_name} {student.patronymic ?? ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-          </div>
-
-          {!(isManagerOrAdmin && !isEditMode && form.lesson_type === 'individual') ? (
-            <label>
-              Тема занятия
-              <input
-                type="text"
-                value={form.topic}
-                onChange={(e) => handleChange('topic', e.target.value)}
-                placeholder="Например: Подготовка к ЕГЭ, модуль 3"
-              />
-            </label>
-          ) : null}
-        </section>
-
-        <section className="lesson-form-section">
-          <h2>Время занятия</h2>
-          <div className="lesson-form-row">
-            <label>
-              Начало
-              <input type="datetime-local" value={form.start_at} onChange={(e) => handleChange('start_at', e.target.value)} />
-            </label>
-            {!isEditMode ? (
-              <label>
-                Фиксированная длительность
-                <input type="text" value={form.lesson_type === 'group' ? '1 час 30 минут' : '1 час'} readOnly />
-              </label>
-            ) : (
-              <label>
-                Окончание
-                <input type="datetime-local" value={form.end_at} onChange={(e) => handleChange('end_at', e.target.value)} />
-              </label>
-            )}
-          </div>
-
-          {isEditMode ? (
-            <>
-              <div className="duration-row">
-                <span>Длительность: {durationMinutes > 0 ? `${durationMinutes} мин` : 'не задана'}</span>
-                <div className="duration-actions">
-                  <button
-                    type="button"
-                    className={`duration-chip ${durationMinutes === 45 ? 'duration-chip--active' : ''}`}
-                    onClick={() => setDurationMinutes(45)}
-                  >
-                    45 мин
-                  </button>
-                  <button
-                    type="button"
-                    className={`duration-chip ${durationMinutes === 60 ? 'duration-chip--active' : ''}`}
-                    onClick={() => setDurationMinutes(60)}
-                  >
-                    60 мин
-                  </button>
-                  <button
-                    type="button"
-                    className={`duration-chip ${durationMinutes === 90 ? 'duration-chip--active' : ''}`}
-                    onClick={() => setDurationMinutes(90)}
-                  >
-                    90 мин
-                  </button>
-                </div>
-              </div>
-              <p className="lesson-form-hint">Подсказка: быстрые кнопки справа автоматически пересчитают время окончания.</p>
-            </>
-          ) : null}
-        </section>
-
-        <section className="lesson-form-section">
-          <h2>Материалы и комментарии</h2>
-          <label>
-            Ссылка на материалы
-            <input
-              type="text"
-              value={form.materials_url}
-              onChange={(e) => handleChange('materials_url', e.target.value)}
-              placeholder="https://..."
-            />
-          </label>
-
-          <label>
-            Комментарий
-            <textarea
-              value={form.comment}
-              onChange={(e) => handleChange('comment', e.target.value)}
-              placeholder="Например: аудитория, заметки по подготовке, домашнее задание"
-            />
-          </label>
-        </section>
-
-        <section className="lesson-form-section">
-          <h2>Параметры</h2>
-          <label className="lesson-form-checkbox">
-            <input
-              type="checkbox"
-              checked={form.is_cancelled}
-              onChange={(e) => handleChange('is_cancelled', e.target.checked)}
-            />
-            Занятие отменено
-          </label>
-
-          {form.is_cancelled && (
-            <p className="lesson-form-subtitle">
-              Ученики этого занятия автоматически попадут в список на назначение отработки.
-            </p>
-          )}
-
-          <label className="lesson-form-checkbox">
-            <input
-              type="checkbox"
-              checked={form.is_recurring_weekly}
-              onChange={(e) => handleChange('is_recurring_weekly', e.target.checked)}
-              disabled={isEditMode}
-            />
-            Повторять еженедельно в это же время
-          </label>
-
-          {form.is_recurring_weekly && !isEditMode && (
-            <label>
-              Повторять до
-              <input type="date" value={form.recurrence_until} onChange={(e) => handleChange('recurrence_until', e.target.value)} />
-            </label>
-          )}
-
-          {isEditMode && canApplyToFuture && (
-            <label className="lesson-form-checkbox lesson-form-checkbox-panel">
-              <input
-                type="checkbox"
-                checked={applyToFuture}
-                onChange={(e) => setApplyToFuture(e.target.checked)}
-              />
-              Применить изменения к этому и всем последующим занятиям серии
-            </label>
-          )}
-        </section>
-          </>
-        )}
-
-        <div className="lesson-form-actions lesson-form-actions--sticky">
-          <button type="button" className="secondary" onClick={() => navigate('/calendar')} disabled={submitting}>
-            Отмена
-          </button>
-          {isEditMode && (
+      {isEditMode ? (
+        <section className="lesson-edit-tabs-panel">
+          <div className="lesson-edit-tabs" role="tablist" aria-label="Разделы редактирования занятия">
             <button
               type="button"
-              className="danger"
-              onClick={() => {
-                setDeleteScope('single');
-                setDeleteDialogOpen(true);
-              }}
-              disabled={submitting}
+              role="tab"
+              aria-selected={editTab === 'attendance'}
+              className={editTab === 'attendance' ? 'lesson-edit-tab lesson-edit-tab--active' : 'lesson-edit-tab'}
+              onClick={() => setEditTab('attendance')}
             >
-              Удалить
+              Посещаемость
             </button>
-          )}
-          <button
-            type="submit"
-            disabled={submitting || (!isMakeupMode && !(isManagerOrAdmin && !isEditMode && form.lesson_type === 'individual') && availableGroups.length === 0)}
-          >
-            {isMakeupMode ? 'Назначить отработки' : (isEditMode ? 'Сохранить изменения' : 'Сохранить занятие')}
-          </button>
-        </div>
-      </form>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={editTab === 'details'}
+              className={editTab === 'details' ? 'lesson-edit-tab lesson-edit-tab--active' : 'lesson-edit-tab'}
+              onClick={() => setEditTab('details')}
+            >
+              Параметры занятия
+            </button>
+          </div>
+        </section>
+      ) : null}
 
-      {isEditMode && (
+      {isEditMode && editTab === 'attendance' && (
         <section className="attendance-section">
           <div className="attendance-header-row">
             <h2>Посещаемость</h2>
@@ -1083,6 +941,388 @@ export const LessonFormPage = () => {
             </div>
           )}
         </section>
+      )}
+
+      {(!isEditMode || editTab === 'details') && (
+        <>
+          <div className="lesson-form-heading">
+            <h1>{isEditMode ? 'Редактирование занятия' : 'Добавление занятия'}</h1>
+            {isEditMode ? (
+              <button
+                type="button"
+                className={isLessonEditEnabled ? 'lesson-edit-toggle lesson-edit-toggle--active' : 'lesson-edit-toggle'}
+                onClick={() => setIsLessonEditEnabled((prev) => !prev)}
+                aria-pressed={isLessonEditEnabled}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                {isLessonEditEnabled ? 'Режим редактирования' : 'Редактировать поля'}
+              </button>
+            ) : null}
+          </div>
+          <p className="lesson-form-subtitle">
+            {isMakeupMode
+              ? 'Выберите преподавателя и учеников из пропусков, чтобы назначить сессию отработки.'
+              : isEditMode
+              ? 'Переключайтесь между вкладками посещаемости и параметров занятия.'
+              : 'После сохранения вы вернетесь на страницу календаря со всеми расписаниями.'}
+          </p>
+        </>
+      )}
+
+      {(!isEditMode || editTab === 'details') && (
+        <div className="lesson-meta">
+          {!isMakeupMode ? <span className="lesson-meta-chip">Группа: {selectedGroup?.name ?? '—'}</span> : null}
+          {!isMakeupMode ? <span className="lesson-meta-chip">Курс: {selectedCourseName}</span> : null}
+          <span className="lesson-meta-chip">Преподаватель: {selectedTeacherName}</span>
+          <span className="lesson-meta-chip">Тип: {isMakeupMode ? 'Отработка' : (form.lesson_type === 'individual' ? 'Индивидуальное занятие' : 'Групповое занятие')}</span>
+        </div>
+      )}
+
+      {error && <div className="lesson-form-error">{error}</div>}
+
+      {(!isEditMode || editTab === 'details') && !isMakeupMode && !isIndividualDirectCreate && availableGroups.length === 0 && (
+        <div className="lesson-form-error">Нет доступных групп для выбранного преподавателя.</div>
+      )}
+
+      {!isEditMode && (isManagerOrAdmin || isTeacher) ? (
+        <section className="lesson-create-tabs-panel">
+          <p className="lesson-create-tabs-hint">Выберите тип занятия</p>
+          <div className="lesson-create-tabs" role="tablist" aria-label="Переключение формы создания занятия">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={createTab === 'group'}
+              className={createTab === 'group' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
+              onClick={() => setCreateTab('group')}
+            >
+              Групповое
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={createTab === 'individual'}
+              className={createTab === 'individual' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
+              onClick={() => setCreateTab('individual')}
+            >
+              Индивидуальное
+            </button>
+            {isManagerOrAdmin ? (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={createTab === 'makeup'}
+                className={createTab === 'makeup' ? 'lesson-create-tab lesson-create-tab--active' : 'lesson-create-tab'}
+                onClick={() => setCreateTab('makeup')}
+              >
+                Отработка
+              </button>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {(!isEditMode || editTab === 'details') && (
+      <form id="lesson-form" className="lesson-form" onSubmit={handleSubmit}>
+        <fieldset className="lesson-form-fieldset" disabled={isEditMode && !isLessonEditEnabled}>
+          {isMakeupMode ? (
+            <>
+            <section className="lesson-form-section">
+              <h2>Параметры отработки</h2>
+              <div className="lesson-form-row">
+                <label>
+                  Преподаватель
+                  <select value={selectedTeacherFilter} onChange={(e) => setSelectedTeacherFilter(e.target.value)}>
+                    <option value="">Выберите преподавателя</option>
+                    {teacherOptions.map((teacher) => (
+                      <option key={teacher.id} value={teacher.id}>
+                        {teacher.second_name} {teacher.first_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Дата и время отработки
+                  <input type="datetime-local" value={form.start_at} onChange={(e) => handleChange('start_at', e.target.value)} />
+                </label>
+              </div>
+              <label>
+                Комментарий для отработки
+                <input
+                  type="text"
+                  value={form.comment}
+                  onChange={(e) => handleChange('comment', e.target.value)}
+                  placeholder="Например: совместная отработка по пропускам"
+                />
+              </label>
+            </section>
+
+            <section className="lesson-form-section">
+              <h2>Ученики на отработку</h2>
+              <input
+                type="text"
+                value={makeupQuery}
+                onChange={(e) => setMakeupQuery(e.target.value)}
+                placeholder="Поиск: ученик, группа, тема пропуска"
+              />
+              {filteredMakeupCandidates.length === 0 ? (
+                <p className="lesson-form-subtitle">Нет доступных пропусков для назначения.</p>
+              ) : (
+                <div className="attendance-list">
+                  {filteredMakeupCandidates.map((item) => (
+                    <label key={item.attendance_id} className="delete-scope-item">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(makeupSelection[item.attendance_id])}
+                        onChange={(e) => setMakeupSelection((prev) => ({ ...prev, [item.attendance_id]: e.target.checked }))}
+                      />
+                      <span>
+                        {item.client_full_name} • {item.group_name} • {item.lesson_topic} • {new Date(item.lesson_start_at).toLocaleString()}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+            </>
+          ) : (
+            <>
+            <section className="lesson-form-section">
+          <h2>Основная информация</h2>
+          <div className="lesson-form-row">
+            <label>
+              Преподаватель
+              <select
+                value={selectedTeacherFilter}
+                onChange={(e) => setSelectedTeacherFilter(e.target.value)}
+                disabled={isTeacher}
+              >
+                {!isTeacher ? <option value="">Выберите преподавателя</option> : null}
+                {teacherOptions.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.second_name} {teacher.first_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {isEditMode ? (
+              <label>
+                Тип события
+                <select value={form.lesson_type} onChange={(e) => handleChange('lesson_type', e.target.value)}>
+                  <option value="group">Групповое занятие</option>
+                  <option value="individual">Индивидуальное занятие</option>
+                </select>
+              </label>
+            ) : null}
+
+            {!isIndividualDirectCreate ? (
+              <label>
+                Группа
+                <select
+                  value={form.group_id}
+                  onChange={(e) => handleChange('group_id', Number(e.target.value))}
+                  disabled={availableGroups.length === 0}
+                >
+                  {availableGroups.length === 0 ? (
+                    <option value={0}>Нет доступных групп</option>
+                  ) : (
+                    availableGroups.map((group) => {
+                      const courseName = courseMap.get(group.course_id)?.name ?? 'Без курса';
+                      const teacher = group.teacher_id ? teacherMap.get(group.teacher_id) : null;
+                      const teacherLabel = teacher ? `${teacher.second_name} ${teacher.first_name}` : 'Не назначен';
+                      return (
+                        <option key={group.id} value={group.id}>
+                          {group.name} - {courseName} - {teacherLabel}
+                        </option>
+                      );
+                    })
+                  )}
+                </select>
+              </label>
+            ) : (
+              <label>
+                Ученик
+                <select value={selectedIndividualStudentId} onChange={(e) => setSelectedIndividualStudentId(Number(e.target.value))}>
+                  <option value={0}>Выберите ученика</option>
+                  {allStudents.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {student.second_name} {student.first_name} {student.patronymic ?? ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+
+          {!isIndividualDirectCreate ? (
+            <label>
+              Тема занятия
+              <input
+                type="text"
+                value={form.topic}
+                onChange={(e) => handleChange('topic', e.target.value)}
+                placeholder="Например: Подготовка к ЕГЭ, модуль 3"
+              />
+            </label>
+          ) : null}
+        </section>
+
+        <section className="lesson-form-section">
+          <h2>Время занятия</h2>
+          <div className="lesson-form-row">
+            <label>
+              Начало
+              <input type="datetime-local" value={form.start_at} onChange={(e) => handleChange('start_at', e.target.value)} />
+            </label>
+            {!isEditMode ? (
+              <label>
+                Фиксированная длительность
+                <input type="text" value={form.lesson_type === 'group' ? '1 час 30 минут' : '1 час'} readOnly />
+              </label>
+            ) : (
+              <label>
+                Окончание
+                <input type="datetime-local" value={form.end_at} onChange={(e) => handleChange('end_at', e.target.value)} />
+              </label>
+            )}
+          </div>
+
+          {isEditMode ? (
+            <>
+              <div className="duration-row">
+                <span>Длительность: {durationMinutes > 0 ? `${durationMinutes} мин` : 'не задана'}</span>
+                <div className="duration-actions">
+                  <button
+                    type="button"
+                    className={`duration-chip ${durationMinutes === 45 ? 'duration-chip--active' : ''}`}
+                    onClick={() => setDurationMinutes(45)}
+                  >
+                    45 мин
+                  </button>
+                  <button
+                    type="button"
+                    className={`duration-chip ${durationMinutes === 60 ? 'duration-chip--active' : ''}`}
+                    onClick={() => setDurationMinutes(60)}
+                  >
+                    60 мин
+                  </button>
+                  <button
+                    type="button"
+                    className={`duration-chip ${durationMinutes === 90 ? 'duration-chip--active' : ''}`}
+                    onClick={() => setDurationMinutes(90)}
+                  >
+                    90 мин
+                  </button>
+                </div>
+              </div>
+              <p className="lesson-form-hint">Подсказка: быстрые кнопки справа автоматически пересчитают время окончания.</p>
+            </>
+          ) : null}
+        </section>
+
+        <section className="lesson-form-section">
+          <h2>Материалы и комментарии</h2>
+          <label>
+            Ссылка на материалы
+            <input
+              type="text"
+              value={form.materials_url}
+              onChange={(e) => handleChange('materials_url', e.target.value)}
+              placeholder="https://..."
+            />
+          </label>
+
+          <label>
+            Комментарий
+            <textarea
+              value={form.comment}
+              onChange={(e) => handleChange('comment', e.target.value)}
+              placeholder="Например: аудитория, заметки по подготовке, домашнее задание"
+            />
+          </label>
+        </section>
+
+        <section className="lesson-form-section">
+          <h2>Параметры</h2>
+          {isEditMode ? (
+            <>
+              <label className="lesson-form-checkbox">
+                <input
+                  type="checkbox"
+                  checked={form.is_cancelled}
+                  onChange={(e) => handleChange('is_cancelled', e.target.checked)}
+                />
+                Занятие отменено
+              </label>
+
+              {form.is_cancelled && (
+                <p className="lesson-form-subtitle">
+                  Ученики этого занятия автоматически попадут в список на назначение отработки.
+                </p>
+              )}
+            </>
+          ) : null}
+
+          <label className="lesson-form-checkbox">
+            <input
+              type="checkbox"
+              checked={form.is_recurring_weekly}
+              onChange={(e) => handleChange('is_recurring_weekly', e.target.checked)}
+              disabled={isEditMode}
+            />
+            Повторять еженедельно в это же время
+          </label>
+
+          {form.is_recurring_weekly && !isEditMode && (
+            <label>
+              Повторять до
+              <input type="date" value={form.recurrence_until} onChange={(e) => handleChange('recurrence_until', e.target.value)} />
+            </label>
+          )}
+
+          {isEditMode && canApplyToFuture && (
+            <label className="lesson-form-checkbox lesson-form-checkbox-panel">
+              <input
+                type="checkbox"
+                checked={applyToFuture}
+                onChange={(e) => setApplyToFuture(e.target.checked)}
+              />
+              Применить изменения к этому и всем последующим занятиям серии
+            </label>
+          )}
+        </section>
+            </>
+          )}
+        </fieldset>
+
+        <div className="lesson-form-actions lesson-form-actions--sticky">
+          <button type="button" className="secondary" onClick={() => navigate('/calendar')} disabled={submitting}>
+            Отмена
+          </button>
+          {isEditMode && (
+            <button
+              type="button"
+              className="danger"
+              onClick={() => {
+                setDeleteScope('single');
+                setDeleteDialogOpen(true);
+              }}
+              disabled={submitting}
+            >
+              Удалить
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={submitting || (isEditMode && !isLessonEditEnabled) || (!isMakeupMode && !isIndividualDirectCreate && availableGroups.length === 0)}
+          >
+            {isMakeupMode ? 'Назначить отработки' : (isEditMode ? 'Сохранить изменения' : 'Сохранить занятие')}
+          </button>
+        </div>
+      </form>
       )}
 
       <ConfirmationModal

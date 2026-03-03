@@ -4,9 +4,11 @@ import { clientsApi } from '../../api/crm';
 import type { Client } from '../../types/crm.types';
 import styles from './ClientsPage.module.css';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 
 export const ClientsPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,11 @@ export const ClientsPage = () => {
   const createClient = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
-    if (!window.confirm('Создать нового клиента?')) {
+    if (!(await confirm({
+      title: 'Создание клиента',
+      message: 'Создать нового клиента?',
+      confirmText: 'Создать',
+    }))) {
       return;
     }
 
@@ -57,7 +63,12 @@ export const ClientsPage = () => {
   };
 
   const removeClient = async (id: number) => {
-    if (!window.confirm('Архивировать этого клиента?')) {
+    if (!(await confirm({
+      title: 'Архивация клиента',
+      message: 'Архивировать этого клиента?',
+      confirmText: 'Архивировать',
+      variant: 'danger',
+    }))) {
       return;
     }
     try {

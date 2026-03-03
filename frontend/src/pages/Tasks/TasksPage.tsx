@@ -3,6 +3,7 @@ import { tasksApi } from '../../api/crm';
 import type { Task, User } from '../../types/crm.types';
 import styles from './TasksPage.module.css';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 
 const STATUS_OPTIONS: Array<{ value: Task['status']; label: string }> = [
   { value: 'open', label: 'Новая' },
@@ -51,6 +52,7 @@ const toInputDateTime = (value: string | null): string => {
 
 export const TasksPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const currentUser = getCurrentUser();
   const roleRaw = typeof currentUser?.role === 'string' ? currentUser.role : currentUser?.role?.name ?? '';
   const roleName = roleRaw.toLowerCase();
@@ -145,7 +147,11 @@ export const TasksPage = () => {
   const createTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!form.title.trim()) return;
-    if (!window.confirm('Создать задачу?')) return;
+    if (!(await confirm({
+      title: 'Создание задачи',
+      message: 'Создать задачу?',
+      confirmText: 'Создать',
+    }))) return;
 
     try {
       setSubmitting(true);
@@ -173,7 +179,11 @@ export const TasksPage = () => {
   };
 
   const patchTask = async (task: Task, payload: Partial<Pick<Task, 'status' | 'priority' | 'deadline'>>, confirmText: string) => {
-    if (!window.confirm(confirmText)) return;
+    if (!(await confirm({
+      title: 'Подтверждение изменения',
+      message: confirmText,
+      confirmText: 'Подтвердить',
+    }))) return;
     try {
       setUpdatingTaskId(task.id);
       await tasksApi.patch(task.id, payload);
@@ -193,7 +203,12 @@ export const TasksPage = () => {
   };
 
   const archiveTask = async (taskId: number) => {
-    if (!window.confirm('Архивировать задачу?')) return;
+    if (!(await confirm({
+      title: 'Архивация задачи',
+      message: 'Архивировать задачу?',
+      confirmText: 'Архивировать',
+      variant: 'danger',
+    }))) return;
     try {
       await tasksApi.remove(taskId);
       await load();

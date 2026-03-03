@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { archiveApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import type { ArchiveEntity, ArchiveItem, ArchiveSortBy, ArchiveSortDir } from '../../types/crm.types';
 import styles from './ArchivePage.module.css';
 
@@ -26,6 +27,7 @@ const ENTITY_LABEL: Record<ArchiveEntity, string> = {
 
 export const ArchivePage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const [items, setItems] = useState<ArchiveItem[]>([]);
   const [query, setQuery] = useState('');
   const [entity, setEntity] = useState<ArchiveEntity | 'all'>('all');
@@ -158,7 +160,11 @@ export const ArchivePage = () => {
                   type="button"
                   className={styles.restoreBtn}
                   onClick={async () => {
-                    if (!window.confirm('Восстановить элемент из архива?')) return;
+                    if (!(await confirm({
+                      title: 'Восстановление',
+                      message: 'Восстановить элемент из архива?',
+                      confirmText: 'Восстановить',
+                    }))) return;
                     try {
                       await archiveApi.restore(item.entity, item.entity_id);
                       notify('success', 'Восстановлено', 'Элемент успешно восстановлен.', { href: '/archive' });

@@ -33,8 +33,10 @@ from .schemas import (
     StudentMakeupRead,
     MakeupItemRead,
     MakeupAssignIn,
+    MakeupCompletionUpdateIn,
     MakeupCalendarEventRead,
     UserSessionRead,
+    UserSelfUpdate,
     UserRead,
 )
 
@@ -73,7 +75,9 @@ __all__ = [
     "StudentMakeupRead",
     "MakeupItemRead",
     "MakeupAssignIn",
+    "MakeupCompletionUpdateIn",
     "MakeupCalendarEventRead",
     "UserSessionRead",
+    "UserSelfUpdate",
     "UserRead",
 ]

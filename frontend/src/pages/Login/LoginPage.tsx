@@ -4,7 +4,7 @@ import { FormPanel } from '@components/ui/auth/FormPanel/FormPanel';
 import { infoPanelListItems } from './resources/infoPanelListItems';
 import { fields } from './resources/formPanelListOfFields';
 import type { LoginFormData } from './Login.types';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { authApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
 
@@ -15,6 +15,14 @@ export const LoginPage = () => {
     password: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const expired = sessionStorage.getItem('auth_expired');
+    if (expired === '1') {
+      sessionStorage.removeItem('auth_expired');
+      notify('info', 'Сессия истекла', 'Срок действия токенов завершён. Войдите в аккаунт повторно.');
+    }
+  }, [notify]);
 
   const canSubmit = useMemo(
     () => loginData.email.trim().length > 3 && loginData.password.length >= 8 && !isSubmitting,

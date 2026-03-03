@@ -15,6 +15,19 @@ const getCurrentUser = (): User | null => {
   }
 };
 
+const getAge = (value: string | null): number | null => {
+  if (!value) return null;
+  const birthDate = new Date(value);
+  if (Number.isNaN(birthDate.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+};
+
 export const TeacherStudentsPage = () => {
   const { notify } = useNotifications();
   const currentUser = getCurrentUser();
@@ -24,6 +37,10 @@ export const TeacherStudentsPage = () => {
   const [groups, setGroups] = useState<TeacherGroupStudents[]>([]);
   const [query, setQuery] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<number | 'all'>('all');
+  const [layout, setLayout] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('my_students_layout');
+    return saved === 'list' ? 'list' : 'grid';
+  });
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -36,6 +53,10 @@ export const TeacherStudentsPage = () => {
       .catch(() => notify('error', 'Ошибка', 'Не удалось загрузить учеников преподавателя.'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('my_students_layout', layout);
+  }, [layout]);
 
   const groupOptions = useMemo(
     () => groups.map((group) => ({ id: group.group_id, name: group.group_name })),
@@ -122,6 +143,27 @@ export const TeacherStudentsPage = () => {
             ))}
           </select>
         </div>
+        <div className={styles.layoutWrap}>
+          <span>Расположение</span>
+          <div className={styles.layoutSwitch} role="group" aria-label="Выбор вида списка учеников">
+            <button
+              type="button"
+              className={layout === 'grid' ? styles.layoutBtnActive : styles.layoutBtn}
+              onClick={() => setLayout('grid')}
+              aria-pressed={layout === 'grid'}
+            >
+              Плитка
+            </button>
+            <button
+              type="button"
+              className={layout === 'list' ? styles.layoutBtnActive : styles.layoutBtn}
+              onClick={() => setLayout('list')}
+              aria-pressed={layout === 'list'}
+            >
+              Список
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -140,17 +182,27 @@ export const TeacherStudentsPage = () => {
                 <div className={styles.groupMeta}>{group.students.length} учеников</div>
               </div>
 
-              <div className={styles.studentsGrid}>
-                {group.students.map((student) => (
-                  <article className={styles.studentCard} key={student.id}>
-                    <strong className={styles.studentName}>{student.second_name} {student.first_name} {student.patronymic ?? ''}</strong>
-                    <p><span>Родитель:</span> {student.parent_full_name ?? 'не указан'}</p>
-                    <p><span>Контакт:</span> {student.parent_phone ?? '-'} / {student.parent_email ?? '-'}</p>
-                    <div className={styles.actions}>
-                      <Link to={`/clients/${student.id}`} className={styles.linkBtn}>Открыть карточку</Link>
-                    </div>
-                  </article>
-                ))}
+              <div className={layout === 'grid' ? styles.studentsGrid : styles.studentsList}>
+                {group.students.map((student) => {
+                  const age = getAge(student.date_of_birth);
+                  return (
+                    <Link key={student.id} to={`/clients/${student.id}`} className={styles.studentCardLink}>
+                      <article className={styles.studentCard}>
+                        <div className={styles.studentTop}>
+                          <span className={styles.studentAvatar}>
+                            {`${student.second_name?.[0] ?? ''}${student.first_name?.[0] ?? ''}`}
+                          </span>
+                          <div>
+                            <strong className={styles.studentName}>{student.second_name} {student.first_name} {student.patronymic ?? ''}</strong>
+                            <p className={styles.studentParent}>{student.parent_full_name ?? 'Родитель не указан'}</p>
+                          </div>
+                        </div>
+                        <p><span>Телефон:</span> {student.parent_phone ?? '-'}</p>
+                        <p><span>Возраст:</span> {age !== null ? `${age} лет` : 'не указан'}</p>
+                      </article>
+                    </Link>
+                  );
+                })}
               </div>
             </article>
           ))}

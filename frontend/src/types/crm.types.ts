@@ -11,6 +11,11 @@ export interface User {
   patronymic: string | null;
   income_per_hour: number;
   phone: string | null;
+  avatar_url?: string | null;
+  vk_contact?: string | null;
+  telegram_contact?: string | null;
+  whatsapp_contact?: string | null;
+  max_contact?: string | null;
   is_accepted: boolean;
   created_at: string;
   role: Role;
@@ -67,6 +72,7 @@ export interface Lesson {
   is_cancelled: boolean;
   is_recurring_weekly: boolean;
   recurrence_group_id: string | null;
+  reminder_minutes_before: number | null;
 }
 
 export type AttendanceStatus = 'present' | 'absent' | 'late';

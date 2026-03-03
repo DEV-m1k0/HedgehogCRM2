@@ -1,17 +1,20 @@
 .page {
   --surface-bg: #ffffff;
   --surface-soft: #f8fbff;
-  --border: #dbe6f4;
-  --text-muted: #64748b;
-  --accent: #1264a3;
-  background: radial-gradient(1200px 500px at 0% 0%, #eff6ff 0%, #ffffff 45%);
+  --border: color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  --text-muted: var(--text-dark-mute);
+  --accent: var(--primary);
+  --accent-soft: color-mix(in srgb, var(--primary) 18%, #ffffff);
+  --title: var(--text-dark);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-mute) 40%, #ffffff) 0%, #ffffff 35%);
   border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  padding: 20px;
+  box-shadow: var(--container-box-shadow-default);
 }
 
 .header h1 {
   margin: 0 0 4px;
+  color: var(--title);
 }
 
 .header p {
@@ -30,7 +33,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface-bg);
-  padding: 12px;
+  padding: 12px 14px;
 }
 
 .statCard span {
@@ -43,24 +46,27 @@
   display: block;
   margin-top: 4px;
   font-size: 24px;
-  color: #0f172a;
+  color: var(--title);
 }
 
 .filters {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(180px, 260px);
+  grid-template-columns: minmax(240px, 1fr) minmax(180px, 260px) minmax(210px, 260px);
   gap: 10px;
+  align-items: end;
 }
 
 .searchWrap,
-.groupFilterWrap {
+.groupFilterWrap,
+.layoutWrap {
   display: grid;
   gap: 6px;
 }
 
 .searchWrap label,
-.groupFilterWrap label {
+.groupFilterWrap label,
+.layoutWrap span {
   font-size: 13px;
   color: var(--text-muted);
   font-weight: 600;
@@ -69,11 +75,56 @@
 .search,
 .groupFilter {
   width: 100%;
-  border: 1px solid #d6d9df;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
   font: inherit;
   background: #ffffff;
+  color: var(--text-dark);
+}
+
+.search:focus,
+.groupFilter:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 42%, #ffffff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 60%, #ffffff);
+}
+
+.layoutSwitch {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.layoutBtn,
+.layoutBtnActive {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.layoutBtn {
+  background: transparent;
+  color: var(--text-dark-mute);
+}
+
+.layoutBtn:hover {
+  background: #f2f5f9;
+  color: var(--text-dark);
+}
+
+.layoutBtnActive {
+  color: #ffffff;
+  background: var(--primary-gradient);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary-shadow) 45%, #ffffff);
 }
 
 .groupList {
@@ -100,6 +151,7 @@
 .groupHead h2 {
   margin: 0;
   font-size: 18px;
+  color: var(--title);
 }
 
 .groupHead span {
@@ -108,9 +160,9 @@
 }
 
 .groupMeta {
-  border: 1px solid #dce7f6;
-  background: #f2f7ff;
-  color: #315b86;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, #d6e4f0);
+  background: var(--accent-soft);
+  color: color-mix(in srgb, var(--primary) 75%, #233444);
   font-size: 12px;
   font-weight: 700;
   padding: 4px 8px;
@@ -123,34 +175,96 @@
   gap: 10px;
 }
 
+.studentsList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.studentsList .studentCard {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(170px, 1fr) minmax(190px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.studentsList .studentTop {
+  margin-bottom: 0;
+}
+
+.studentsList .studentCard p {
+  margin: 0;
+}
+
+.studentsList .actions {
+  margin-top: 0;
+  justify-self: end;
+}
+
 .studentCard {
-  border: 1px solid #e6edf7;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
   background: var(--surface-soft);
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
+.studentCardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .studentCard:hover {
-  border-color: #c5d9f1;
-  box-shadow: 0 6px 18px rgba(18, 100, 163, 0.1);
+  border-color: color-mix(in srgb, var(--primary) 36%, #d1dce7);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--primary-shadow) 35%, #ffffff);
   transform: translateY(-1px);
+}
+
+.studentCardLink:focus-visible .studentCard {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, #ffffff);
+  outline-offset: 2px;
+}
+
+.studentTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.studentAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: color-mix(in srgb, var(--primary) 70%, #1f2d3a);
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
 .studentName {
   display: block;
-  margin-bottom: 6px;
-  color: #0f172a;
+  color: var(--title);
+}
+
+.studentParent {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .studentCard p {
   margin: 4px 0;
-  color: #475569;
+  color: color-mix(in srgb, var(--text-dark) 76%, #4f6072);
   font-size: 14px;
 }
 
 .studentCard p span {
-  color: #0f172a;
+  color: var(--title);
   font-weight: 600;
 }
 
@@ -170,8 +284,9 @@
 }
 
 .linkBtn {
-  background: var(--accent);
+  background: var(--primary-gradient);
   color: #fff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 45%, #ffffff);
 }
 
 .linkBtnSecondary {
@@ -187,6 +302,20 @@
 @media (max-width: 860px) {
   .filters {
     grid-template-columns: 1fr;
+  }
+
+  .layoutSwitch {
+    max-width: 300px;
+  }
+
+  .studentsList .studentCard {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .studentsList .actions {
+    justify-self: start;
   }
 }
 

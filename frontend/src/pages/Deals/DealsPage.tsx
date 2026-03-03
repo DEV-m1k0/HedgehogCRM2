@@ -4,6 +4,7 @@ import { clientsApi, dealsApi, metaApi } from '../../api/crm';
 import type { Client, Deal, User } from '../../types/crm.types';
 import styles from './DealsPage.module.css';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 
 const STAGES = ['Первичный контакт', 'Пробный урок', 'Выбор курса', 'Оформление договора', 'Оплата', 'Учеба'];
 const STATUS_OPTIONS = [
@@ -16,6 +17,7 @@ const LAST_STAGE = STAGES[STAGES.length - 1];
 
 export const DealsPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -72,7 +74,11 @@ export const DealsPage = () => {
     if (!form.client_id) {
       return;
     }
-    if (!window.confirm('Создать новую сделку?')) {
+    if (!(await confirm({
+      title: 'Создание сделки',
+      message: 'Создать новую сделку?',
+      confirmText: 'Создать',
+    }))) {
       return;
     }
 
@@ -99,7 +105,11 @@ export const DealsPage = () => {
   };
 
   const updateDeal = async (dealId: number, payload: Partial<Pick<Deal, 'stage' | 'amount' | 'status' | 'deadline'>>, confirmText: string) => {
-    if (!window.confirm(confirmText)) {
+    if (!(await confirm({
+      title: 'Подтверждение изменения',
+      message: confirmText,
+      confirmText: 'Подтвердить',
+    }))) {
       return;
     }
     try {
@@ -144,7 +154,12 @@ export const DealsPage = () => {
   };
 
   const archiveDeal = async (dealId: number) => {
-    if (!window.confirm('Архивировать сделку?')) {
+    if (!(await confirm({
+      title: 'Архивация сделки',
+      message: 'Архивировать сделку?',
+      confirmText: 'Архивировать',
+      variant: 'danger',
+    }))) {
       return;
     }
     try {

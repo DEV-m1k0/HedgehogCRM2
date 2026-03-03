@@ -6,10 +6,12 @@ import listPlugin from '@fullcalendar/list';
 import type { BaseEvent } from './Schedule.types';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { EventClickArg, EventContentArg, EventDropArg } from '@fullcalendar/core';
+import type { DatesSetArg, EventClickArg, EventContentArg, EventDropArg } from '@fullcalendar/core';
 import { coursesApi, groupsApi, metaApi, scheduleApi } from '../../api/crm';
 import type { Course, User } from '../../types/crm.types';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { loadTeacherSettings, type TeacherSettings } from '../../utils/teacherSettings';
+import { useAppLanguage } from '../../i18n/AppLanguage';
 
 import './Schedule.css';
 
@@ -38,12 +40,14 @@ const getCurrentUser = (): User | null => {
 export const SchedulePage = () => {
   const navigate = useNavigate();
   const { notify } = useNotifications();
+  const { language } = useAppLanguage();
+  const isEn = language === 'en';
   const calendarRef = useRef<FullCalendar | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
-  const currentUser = getCurrentUser();
+  const currentUser = useMemo(() => getCurrentUser(), []);
   const roleRaw = typeof currentUser?.role === 'string' ? currentUser.role : currentUser?.role?.name ?? '';
   const roleName = roleRaw.toLowerCase();
-  const isTeacher = roleName === 'преподаватель';
+  const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
   const isManager = roleName.includes('менеджер') || roleName.includes('manager');
   const isAdmin = roleName.includes('администратор') || roleName.includes('admin');
 
@@ -53,12 +57,25 @@ export const SchedulePage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState<number | 'all'>(() => (isTeacher && currentUser ? currentUser.id : 'all'));
   const [viewportWidth, setViewportWidth] = useState<number>(window.innerWidth);
+  const [currentViewType, setCurrentViewType] = useState('dayGridMonth');
+  const [teacherSettings, setTeacherSettings] = useState<TeacherSettings>(() => loadTeacherSettings(currentUser));
 
   useEffect(() => {
     if (isTeacher && currentUser) {
       setSelectedTeacherId(currentUser.id);
     }
   }, [isTeacher, currentUser]);
+
+  useEffect(() => {
+    const syncSettings = () => setTeacherSettings(loadTeacherSettings(currentUser));
+    syncSettings();
+    window.addEventListener('storage', syncSettings);
+    window.addEventListener('teacher-settings-updated', syncSettings as EventListener);
+    return () => {
+      window.removeEventListener('storage', syncSettings);
+      window.removeEventListener('teacher-settings-updated', syncSettings as EventListener);
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     const handleResize = () => setViewportWidth(window.innerWidth);
@@ -94,6 +111,12 @@ export const SchedulePage = () => {
 
     const renderedLessonEvents = lessonsRes.data
       .filter((lesson) => {
+        if (isTeacher && !teacherSettings.showCancelledLessons && lesson.is_cancelled) {
+          return false;
+        }
+        return true;
+      })
+      .filter((lesson) => {
         if (selectedTeacherId === 'all') {
           return true;
         }
@@ -110,11 +133,12 @@ export const SchedulePage = () => {
         } else if (lesson.is_conducted) {
           color = '#16a34a';
         }
-        const recurringLabel = lesson.is_recurring_weekly ? ' (каждую неделю)' : '';
+        const fullTitle = `${courseName}: ${lesson.topic}`;
+        const shortTitle = lesson.topic;
 
         return {
           id: String(lesson.id),
-          title: `${courseName}: ${lesson.topic}${recurringLabel}`,
+          title: fullTitle,
           start: lesson.start_at,
           end: lesson.end_at,
           color,
@@ -123,6 +147,10 @@ export const SchedulePage = () => {
             lessonType: lesson.lesson_type,
             isCancelled: lesson.is_cancelled,
             isConducted: lesson.is_conducted,
+            shortTitle,
+            fullTitle,
+            courseName,
+            isRecurringWeekly: lesson.is_recurring_weekly,
           },
         } satisfies BaseEvent;
       });
@@ -156,7 +184,7 @@ export const SchedulePage = () => {
 
   useEffect(() => {
     load().catch(console.error);
-  }, [selectedTeacherId]);
+  }, [selectedTeacherId, teacherSettings.showCancelledLessons, isTeacher]);
 
   useEffect(() => {
     let updateTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -218,12 +246,22 @@ export const SchedulePage = () => {
         navigate(`/calendar/new?${params.toString()}`);
         return;
       }
-      const clientId = info.event.extendedProps?.clientId as number | undefined;
-      if (clientId) {
-        navigate(`/clients/${clientId}`);
-        return;
+      const params = new URLSearchParams();
+      const makeupTeacherId = info.event.extendedProps?.makeupTeacherId as number | null | undefined;
+      const makeupGroupId = info.event.extendedProps?.makeupGroupId as number | null | undefined;
+      const makeupAt = info.event.extendedProps?.makeupAt as string | undefined;
+      if (makeupTeacherId) {
+        params.set('teacherId', String(makeupTeacherId));
       }
-      navigate('/makeups');
+      if (makeupGroupId) {
+        params.set('makeupGroupId', String(makeupGroupId));
+      }
+      if (makeupAt) {
+        params.set('date', makeupAt.slice(0, 10));
+        params.set('makeupAt', makeupAt);
+      }
+      params.set('mode', 'makeup-attendance');
+      navigate(`/calendar/new?${params.toString()}`);
       return;
     }
     navigate(`/calendar/${info.event.id}/edit`);
@@ -253,37 +291,115 @@ export const SchedulePage = () => {
         end_at: toApiLocalDateTime(nextEnd),
         apply_to_future: false,
       });
-      notify('success', 'Занятие перенесено', 'Новое время занятия сохранено.');
+      notify('success', isEn ? 'Lesson moved' : 'Занятие перенесено', isEn ? 'New lesson time has been saved.' : 'Новое время занятия сохранено.');
       await load();
     } catch (error) {
       console.error(error);
       info.revert();
-      notify('error', 'Ошибка', 'Не удалось сохранить новое время занятия.');
+      notify('error', isEn ? 'Error' : 'Ошибка', isEn ? 'Failed to save lesson time.' : 'Не удалось сохранить новое время занятия.');
     }
   };
 
   const renderEventContent = (info: EventContentArg) => {
+    const isTimeGridView = info.view.type.startsWith('timeGrid');
+    const isMonthView = info.view.type === 'dayGridMonth';
+    const isListView = info.view.type.startsWith('list');
     const timeText = info.timeText || (info.event.start
       ? info.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
       : '');
     const lessonType = (info.event.extendedProps?.lessonType as string | undefined) ?? 'group';
-    const typeLabel = lessonType === 'individual'
-      ? 'Индивидуальное'
+    const typeLabelShort = lessonType === 'individual'
+      ? (isEn ? 'Ind.' : 'Инд.')
       : lessonType === 'makeup'
-        ? 'Отработка'
-        : 'Групповое';
+        ? (isEn ? 'Mkp.' : 'Отр.')
+        : (isEn ? 'Grp.' : 'Гр.');
+    const typeLabelLong = lessonType === 'individual'
+      ? (isEn ? 'Individual' : 'Индивидуальное')
+      : lessonType === 'makeup'
+        ? (isEn ? 'Makeup' : 'Отработка')
+        : (isEn ? 'Group' : 'Групповое');
     const isCancelled = Boolean(info.event.extendedProps?.isCancelled);
     const isConducted = Boolean(info.event.extendedProps?.isConducted);
-    const statusLabel = isCancelled ? 'Отменено' : isConducted ? 'Проведено' : '';
+    const statusLabel = isCancelled ? (isEn ? 'Cancelled' : 'Отменено') : isConducted ? (isEn ? 'Conducted' : 'Проведено') : '';
+    const shortTitle = (info.event.extendedProps?.shortTitle as string | undefined) ?? info.event.title;
+    const fullTitle = (info.event.extendedProps?.fullTitle as string | undefined) ?? info.event.title;
+    const isRecurringWeekly = Boolean(info.event.extendedProps?.isRecurringWeekly);
+    const displayTitle = isTeacher
+      ? (
+        teacherSettings.eventTitleMode === 'short' || !teacherSettings.showCourseInTitle
+          ? shortTitle
+          : fullTitle
+      )
+      : info.event.title;
+    const listTimeLabel = timeText || (isEn ? 'Time not set' : 'Время не указано');
+    const indicatorColor = info.event.backgroundColor || info.event.borderColor || '#64748b';
+    const titleLinesClass = `calendar-event-title--lines-${isTeacher ? teacherSettings.eventTitleLines : 2}`;
+    const isMakeup = lessonType === 'makeup';
+
+    if (isMakeup) {
+      if (isListView) {
+        return (
+          <div className="calendar-list-event calendar-list-event--time-only">
+            <div className="calendar-list-event-time-wrap">
+              <div className="calendar-list-event-time">{listTimeLabel}</div>
+              <span className="calendar-event-makeup-chip">{isEn ? 'Makeup' : 'Отработка'}</span>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="calendar-event-inner calendar-event-inner--time-only">
+          <div className="calendar-event-time-wrap">
+            <div className="calendar-event-time">{listTimeLabel}</div>
+            <span className="calendar-event-makeup-chip">{isEn ? 'Makeup' : 'Отработка'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (isListView) {
+      return (
+        <div className={`calendar-list-event ${isTeacher && teacherSettings.dimConductedEvents && isConducted ? 'calendar-list-event--muted' : ''}`}>
+          <div className="calendar-list-event-top">
+            <div className="calendar-list-event-head-left">
+              <span className="calendar-list-event-indicator" style={{ backgroundColor: indicatorColor }} />
+              {( !isTeacher || teacherSettings.showEventTime ) ? <span className="calendar-list-event-time">{listTimeLabel}</span> : null}
+            </div>
+            <div className="calendar-list-event-badges">
+              {(!isTeacher || teacherSettings.showEventTypeBadges) ? (
+                <span className={`calendar-event-type calendar-event-type--${lessonType}`}>{typeLabelLong}</span>
+              ) : null}
+              {(!isTeacher || teacherSettings.showRecurringBadge) && isRecurringWeekly ? (
+                <span className="calendar-event-recurring">{isEn ? 'Recurring' : 'Повтор'}</span>
+              ) : null}
+              {(!isTeacher || teacherSettings.showEventStatusBadges) && statusLabel ? (
+                <span className="calendar-event-status">{statusLabel}</span>
+              ) : null}
+            </div>
+          </div>
+          <div className={`calendar-list-event-title ${titleLinesClass}`}>{displayTitle}</div>
+        </div>
+      );
+    }
 
     return (
-      <div className="calendar-event-inner">
-        {timeText ? <div className="calendar-event-time">{timeText}</div> : null}
-        <div className="calendar-event-meta">
-          <span className={`calendar-event-type calendar-event-type--${lessonType}`}>{typeLabel}</span>
-          {statusLabel ? <span className="calendar-event-status">{statusLabel}</span> : null}
+      <div className={`calendar-event-inner ${isTimeGridView ? 'calendar-event-inner--timegrid' : ''} ${isTeacher && teacherSettings.dimConductedEvents && isConducted ? 'calendar-event-inner--muted' : ''}`}>
+        {( !isTeacher || teacherSettings.showEventTime ) && timeText ? <div className="calendar-event-time">{timeText}</div> : null}
+        {!isTimeGridView && (!isTeacher || teacherSettings.showEventTypeBadges || teacherSettings.showEventStatusBadges) ? (
+          <div className="calendar-event-meta">
+            {(!isTeacher || teacherSettings.showEventTypeBadges) ? (
+              <span className={`calendar-event-type calendar-event-type--${lessonType}`}>{typeLabelShort}</span>
+            ) : null}
+            {(!isTeacher || teacherSettings.showRecurringBadge) && isRecurringWeekly ? <span className="calendar-event-recurring">{isEn ? 'Recurring' : 'Повтор'}</span> : null}
+            {(!isTeacher || teacherSettings.showEventStatusBadges) && statusLabel ? <span className="calendar-event-status">{statusLabel}</span> : null}
+          </div>
+        ) : null}
+        <div className={`calendar-event-title ${titleLinesClass}`}>
+          {(isTimeGridView || isMonthView) && (!isTeacher || teacherSettings.showEventTypeBadges)
+            ? <span className={`calendar-event-type-inline calendar-event-type-inline--${lessonType}`}>{typeLabelShort}</span>
+            : null}
+          {displayTitle}
         </div>
-        <div className="calendar-event-title">{info.event.title}</div>
       </div>
     );
   };
@@ -297,6 +413,7 @@ export const SchedulePage = () => {
   }, [events, searchTerm]);
 
   const isMobileCalendar = viewportWidth <= 640;
+  const isMonthView = currentViewType === 'dayGridMonth';
   const calendarHeaderToolbar = isMobileCalendar
     ? { left: 'prev,next today', center: 'title', right: 'timeGridDay,listWeek,timeGridWeek' }
     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listWeek' };
@@ -309,9 +426,13 @@ export const SchedulePage = () => {
 
     const currentView = api.view.type;
     if (isMobileCalendar && currentView === 'dayGridMonth') {
-      api.changeView('timeGridWeek');
+      api.changeView(teacherSettings.mobileView);
     }
-  }, [isMobileCalendar]);
+  }, [isMobileCalendar, teacherSettings.mobileView]);
+
+  const initialView = isTeacher
+    ? (isMobileCalendar ? teacherSettings.mobileView : teacherSettings.desktopView)
+    : (isMobileCalendar ? 'timeGridWeek' : 'dayGridMonth');
 
   return (
     <section className="schedule-page" ref={containerRef}>
@@ -319,20 +440,20 @@ export const SchedulePage = () => {
         {isManager ? (
           <>
             <div className="schedule-controls schedule-controls--search">
-              <label htmlFor="scheduleSearch">Поиск по занятиям</label>
+              <label htmlFor="scheduleSearch">{isEn ? 'Search lessons' : 'Поиск по занятиям'}</label>
               <input
                 id="scheduleSearch"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Тема, курс, отметка статуса..."
+                placeholder={isEn ? 'Topic, course, status...' : 'Тема, курс, отметка статуса...'}
               />
-              <small>Нажмите на день календаря, чтобы добавить новое занятие.</small>
+              <small>{isEn ? 'Click a day in calendar to add a lesson.' : 'Нажмите на день календаря, чтобы добавить новое занятие.'}</small>
             </div>
 
             {!isTeacher && (
               <div className="schedule-controls schedule-controls--teacher">
-                <label htmlFor="teacherFilter">Преподаватель</label>
+                <label htmlFor="teacherFilter">{isEn ? 'Teacher' : 'Преподаватель'}</label>
                 <select
                   id="teacherFilter"
                   value={selectedTeacherId}
@@ -344,7 +465,7 @@ export const SchedulePage = () => {
                     setSelectedTeacherId(Number(e.target.value));
                   }}
                 >
-                  <option value="all">Все преподаватели</option>
+                  <option value="all">{isEn ? 'All teachers' : 'Все преподаватели'}</option>
                   {teacherOptions.map((teacher) => (
                     <option key={teacher.id} value={teacher.id}>
                       {teacher.second_name} {teacher.first_name}
@@ -358,7 +479,7 @@ export const SchedulePage = () => {
           <>
             {!isTeacher && (
               <div className="schedule-controls schedule-controls--teacher">
-                <label htmlFor="teacherFilter">Преподаватель</label>
+                <label htmlFor="teacherFilter">{isEn ? 'Teacher' : 'Преподаватель'}</label>
                 <select
                   id="teacherFilter"
                   value={selectedTeacherId}
@@ -370,7 +491,7 @@ export const SchedulePage = () => {
                     setSelectedTeacherId(Number(e.target.value));
                   }}
                 >
-                  <option value="all">Все преподаватели</option>
+                  <option value="all">{isEn ? 'All teachers' : 'Все преподаватели'}</option>
                   {teacherOptions.map((teacher) => (
                     <option key={teacher.id} value={teacher.id}>
                       {teacher.second_name} {teacher.first_name}
@@ -381,15 +502,15 @@ export const SchedulePage = () => {
             )}
 
             <div className="schedule-controls schedule-controls--search">
-              <label htmlFor="scheduleSearch">Поиск по занятиям</label>
+              <label htmlFor="scheduleSearch">{isEn ? 'Search lessons' : 'Поиск по занятиям'}</label>
               <input
                 id="scheduleSearch"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Тема, курс, отметка статуса..."
+                placeholder={isEn ? 'Topic, course, status...' : 'Тема, курс, отметка статуса...'}
               />
-              <small>Нажмите на день календаря, чтобы добавить новое занятие.</small>
+              <small>{isEn ? 'Click a day in calendar to add a lesson.' : 'Нажмите на день календаря, чтобы добавить новое занятие.'}</small>
             </div>
           </>
         )}
@@ -397,7 +518,7 @@ export const SchedulePage = () => {
 
       {!isTeacher && (
         <div className="schedule-mobile-filter">
-          <label htmlFor="teacherFilterMobile">Преподаватель</label>
+          <label htmlFor="teacherFilterMobile">{isEn ? 'Teacher' : 'Преподаватель'}</label>
           <select
             id="teacherFilterMobile"
             value={selectedTeacherId}
@@ -409,7 +530,7 @@ export const SchedulePage = () => {
               setSelectedTeacherId(Number(e.target.value));
             }}
           >
-            <option value="all">Все преподаватели</option>
+            <option value="all">{isEn ? 'All teachers' : 'Все преподаватели'}</option>
             {teacherOptions.map((teacher) => (
               <option key={teacher.id} value={teacher.id}>
                 {teacher.second_name} {teacher.first_name}
@@ -420,7 +541,9 @@ export const SchedulePage = () => {
       )}
 
       <FullCalendar
+        key={`calendar-${isTeacher ? 'teacher' : 'other'}-${isMobileCalendar ? 'mobile' : 'desktop'}-${initialView}-${teacherSettings.slotDuration}-${teacherSettings.snapDuration}-${teacherSettings.firstDay}-${teacherSettings.timeFormat}-${teacherSettings.showWeekends}-${teacherSettings.denseEvents}-${teacherSettings.dayStartTime}-${teacherSettings.dayEndTime}-${teacherSettings.initialScrollTime}-${teacherSettings.monthEventRows}-${teacherSettings.showNowIndicator}`}
         ref={calendarRef}
+        datesSet={(arg: DatesSetArg) => setCurrentViewType(arg.view.type)}
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         eventDrop={handleEventDrop}
@@ -430,7 +553,7 @@ export const SchedulePage = () => {
         fixedMirrorParent={document.body}
         selectable
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView="dayGridMonth"
+        initialView={initialView}
         headerToolbar={calendarHeaderToolbar}
         views={{
           timeGridWeek: {
@@ -438,16 +561,25 @@ export const SchedulePage = () => {
           },
           dayGridMonth: {
             dayHeaderFormat: { weekday: isMobileCalendar ? 'narrow' : 'long' },
+            dayMaxEventRows: isTeacher ? teacherSettings.monthEventRows : 2,
+            height: 'auto',
+            contentHeight: 'auto',
           },
         }}
-        locale="ru"
+        locale={isEn ? 'en' : 'ru'}
         events={visibleEvents}
         eventContent={renderEventContent}
         allDayContent="Весь день"
-        height="82vh"
-        firstDay={1}
+        height={isMonthView ? 'auto' : '82vh'}
+        firstDay={isTeacher ? teacherSettings.firstDay : 1}
+        weekends={isTeacher ? teacherSettings.showWeekends : true}
         timeZone="local"
-        slotDuration="00:30:00"
+        slotDuration={isTeacher ? teacherSettings.slotDuration : '00:30:00'}
+        snapDuration={isTeacher ? teacherSettings.snapDuration : '00:15:00'}
+        slotMinTime={isTeacher ? teacherSettings.dayStartTime : '00:00:00'}
+        slotMaxTime={isTeacher ? teacherSettings.dayEndTime : '24:00:00'}
+        scrollTime={isTeacher ? teacherSettings.initialScrollTime : '08:00:00'}
+        nowIndicator={isTeacher ? teacherSettings.showNowIndicator : true}
         slotEventOverlap={!isMobileCalendar}
         eventMinHeight={isMobileCalendar ? 34 : 22}
         eventShortHeight={isMobileCalendar ? 26 : 18}
@@ -456,34 +588,37 @@ export const SchedulePage = () => {
         eventTimeFormat={{
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false,
+          hour12: isTeacher ? teacherSettings.timeFormat === '12h' : false,
         }}
-        dayMaxEvents
-        eventMaxStack={isMobileCalendar ? 3 : 2}
+        eventMaxStack={isTeacher ? (teacherSettings.denseEvents ? 4 : (isMobileCalendar ? 3 : 2)) : (isMobileCalendar ? 3 : 2)}
         eventDisplay="block"
         expandRows
         fixedWeekCount={!isMobileCalendar}
         buttonText={{
-          today: 'Сегодня',
-          month: isMobileCalendar ? 'Мес' : 'Месяц',
-          week: isMobileCalendar ? 'Нед' : 'Неделя',
-          day: 'День',
-          list: 'Список',
+          today: isEn ? 'Today' : 'Сегодня',
+          month: isEn ? (isMobileCalendar ? 'Mon' : 'Month') : (isMobileCalendar ? 'Мес' : 'Месяц'),
+          week: isEn ? (isMobileCalendar ? 'Wk' : 'Week') : (isMobileCalendar ? 'Нед' : 'Неделя'),
+          day: isEn ? 'Day' : 'День',
+          list: isEn ? 'List' : 'Список',
         }}
       />
 
-      <div className="schedule-legend">
-        {courses.map((course) => (
-          <span key={course.id} className="schedule-legend-item">
-            <span className="schedule-legend-dot" style={{ backgroundColor: getCourseColor(course.name) }} />
-            {course.name}
-          </span>
-        ))}
-      </div>
+      {(!isTeacher || teacherSettings.showLegend) && (
+        <div className="schedule-legend">
+          {courses.map((course) => (
+            <span key={course.id} className="schedule-legend-item">
+              <span className="schedule-legend-dot" style={{ backgroundColor: getCourseColor(course.name) }} />
+              {course.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       {visibleEvents.length === 0 && (
         <div className="schedule-empty-state">
-          Занятий не найдено. Попробуйте изменить фильтры или добавить новое занятие.
+          {isEn
+            ? 'No lessons found. Try changing filters or add a new lesson.'
+            : 'Занятий не найдено. Попробуйте изменить фильтры или добавить новое занятие.'}
         </div>
       )}
     </section>

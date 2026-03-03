@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { metaApi, scheduleApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import type { MakeupItem, User } from '../../types/crm.types';
 import styles from './MakeupsPage.module.css';
 
@@ -44,6 +45,7 @@ const isAssigned = (item: MakeupItem) => Boolean(item.makeup_lesson_at && item.m
 
 export const MakeupsPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const [searchParams] = useSearchParams();
   const currentUser = getCurrentUser();
   const roleRaw = typeof currentUser?.role === 'string' ? currentUser.role : currentUser?.role?.name ?? '';
@@ -185,7 +187,11 @@ export const MakeupsPage = () => {
       return;
     }
 
-    if (!window.confirm('Сохранить изменения по отработке?')) {
+    if (!(await confirm({
+      title: 'Сохранение отработки',
+      message: 'Сохранить изменения по отработке?',
+      confirmText: 'Сохранить',
+    }))) {
       return;
     }
 

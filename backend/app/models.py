@@ -32,6 +32,11 @@ class User(Base):
     income_per_hour: Mapped[float] = mapped_column(Float, default=0.0)
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    vk_contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    telegram_contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    whatsapp_contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    max_contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_accepted: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
@@ -133,6 +138,8 @@ class Lesson(Base):
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_recurring_weekly: Mapped[bool] = mapped_column(Boolean, default=False)
     recurrence_group_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reminder_minutes_before: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     group: Mapped[StudyGroup] = relationship(back_populates="lessons")

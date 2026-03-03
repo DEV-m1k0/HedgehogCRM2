@@ -18,9 +18,12 @@ import { LessonFormPage } from './pages/Schedule/LessonFormPage';
 import { ArchivePage } from './pages/Archive/ArchivePage';
 import { ArchiveDetailsPage } from './pages/Archive/ArchiveDetailsPage';
 import { NotificationsProvider } from './components/feedback/Notifications';
+import { ConfirmDialogProvider } from './components/feedback/ConfirmDialog';
 import { AdminActivityPage } from './pages/Admin/AdminActivityPage';
 import { TeacherStudentsPage } from './pages/TeacherStudents/TeacherStudentsPage';
 import { TeacherStudentEditPage } from './pages/TeacherStudents/TeacherStudentEditPage';
+import { StaffDirectoryPage } from './pages/Staff/StaffDirectoryPage';
+import { StaffProfilePage } from './pages/Staff/StaffProfilePage';
 import type { User } from './types/crm.types';
 
 const HomePageRedirect = () => {
@@ -60,8 +63,9 @@ const ClientsPageGuard = () => {
 function App() {
   return (
     <NotificationsProvider>
-      <BrowserRouter>
-        <Routes>
+      <ConfirmDialogProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
 
@@ -78,6 +82,8 @@ function App() {
           <Route path="/clients/:clientId" element={<ClientDetailsPage />} />
           <Route path="/my-students" element={<TeacherStudentsPage />} />
           <Route path="/my-students/:clientId/edit" element={<TeacherStudentEditPage />} />
+          <Route path="/staff" element={<StaffDirectoryPage />} />
+          <Route path="/staff/:userId" element={<StaffProfilePage />} />
           <Route path="/deals" element={<DealsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/calendar" element={<SchedulePage />} />
@@ -95,8 +101,9 @@ function App() {
         </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </ConfirmDialogProvider>
     </NotificationsProvider>
   );
 }

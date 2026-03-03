@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { archiveApi } from '../../api/crm';
 import { useNotifications } from '../../components/feedback/Notifications';
+import { useConfirmDialog } from '../../components/feedback/ConfirmDialog';
 import type { ArchiveEntity } from '../../types/crm.types';
 import styles from './ArchivePage.module.css';
 
@@ -17,6 +18,7 @@ const ACTIVE_ROUTE_MAP: Record<ArchiveEntity, (id: number) => string> = {
 
 export const ArchiveDetailsPage = () => {
   const { notify } = useNotifications();
+  const { confirm } = useConfirmDialog();
   const navigate = useNavigate();
   const { entity, entityId } = useParams();
   const [data, setData] = useState<Record<string, unknown> | null>(null);
@@ -49,7 +51,11 @@ export const ArchiveDetailsPage = () => {
               type="button"
               className={styles.restoreBtn}
               onClick={async () => {
-                if (!window.confirm('Восстановить элемент из архива?')) return;
+                if (!(await confirm({
+                  title: 'Восстановление',
+                  message: 'Восстановить элемент из архива?',
+                  confirmText: 'Восстановить',
+                }))) return;
                 try {
                   const entityName = entity as ArchiveEntity;
                   const id = Number(entityId);

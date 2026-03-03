@@ -3,10 +3,12 @@ import os
 import time
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
@@ -15,8 +17,11 @@ from app.db import SessionLocal, engine
 from app.logging_setup import setup_logging
 from app.models import AuditLog, Base, Role, UserSession
 from app.security import decode_token
+from app.services.lesson_reminders import start_lesson_reminder_worker, stop_lesson_reminder_worker
 
 DEFAULT_ROLES = ["администратор", "менеджер", "преподаватель", "аноним"]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+MEDIA_ROOT = BACKEND_ROOT / "media"
 
 
 def _seed_roles() -> None:
@@ -46,6 +51,10 @@ def _ensure_schedule_schema() -> None:
             connection.execute(text("ALTER TABLE lessons ADD COLUMN is_cancelled BOOLEAN NOT NULL DEFAULT 0"))
         if "lesson_type" not in lesson_columns:
             connection.execute(text("ALTER TABLE lessons ADD COLUMN lesson_type VARCHAR(20) NOT NULL DEFAULT 'group'"))
+        if "reminder_minutes_before" not in lesson_columns:
+            connection.execute(text("ALTER TABLE lessons ADD COLUMN reminder_minutes_before INTEGER"))
+        if "reminder_sent_at" not in lesson_columns:
+            connection.execute(text("ALTER TABLE lessons ADD COLUMN reminder_sent_at DATETIME"))
 
 
 def _ensure_archive_schema() -> None:
@@ -74,6 +83,24 @@ def _ensure_auth_schema() -> None:
             connection.execute(text("ALTER TABLE user_sessions ADD COLUMN expires_at DATETIME"))
         if "revoked_at" not in session_columns:
             connection.execute(text("ALTER TABLE user_sessions ADD COLUMN revoked_at DATETIME"))
+
+
+def _ensure_users_contacts_schema() -> None:
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    with engine.begin() as connection:
+        if "vk_contact" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN vk_contact VARCHAR(255)"))
+        if "telegram_contact" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN telegram_contact VARCHAR(255)"))
+        if "whatsapp_contact" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN whatsapp_contact VARCHAR(255)"))
+        if "max_contact" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN max_contact VARCHAR(255)"))
+        if "avatar_url" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
 
 
 def _ensure_attendance_schema() -> None:
@@ -146,6 +173,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
 
     @app.on_event("startup")
     def on_startup() -> None:
@@ -153,10 +182,16 @@ def create_app() -> FastAPI:
         _ensure_schedule_schema()
         _ensure_archive_schema()
         _ensure_auth_schema()
+        _ensure_users_contacts_schema()
         _ensure_attendance_schema()
         _ensure_makeup_groups_schema()
         _seed_roles()
+        start_lesson_reminder_worker(SessionLocal)
         logger.info("Application startup completed")
+
+    @app.on_event("shutdown")
+    def on_shutdown() -> None:
+        stop_lesson_reminder_worker()
 
     @app.middleware("http")
     async def request_logger(request: Request, call_next):
@@ -180,6 +215,7 @@ def create_app() -> FastAPI:
             "/docs/oauth2-redirect",
             "/redoc",
         }
+        is_public_path = path in public_paths or path.startswith("/media/")
         has_valid_session = False
 
         db = SessionLocal()
@@ -209,7 +245,7 @@ def create_app() -> FastAPI:
         finally:
             db.close()
 
-        if request.method != "OPTIONS" and path not in public_paths and not has_valid_session:
+        if request.method != "OPTIONS" and not is_public_path and not has_valid_session:
             return JSONResponse(status_code=401, content={"detail": "Требуется авторизация"})
 
         try:

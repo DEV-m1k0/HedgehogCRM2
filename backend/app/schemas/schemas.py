@@ -34,9 +34,38 @@ class UserRead(ORMBase):
     patronymic: str | None
     income_per_hour: float
     phone: str | None
+    avatar_url: str | None = None
+    vk_contact: str | None = None
+    telegram_contact: str | None = None
+    whatsapp_contact: str | None = None
+    max_contact: str | None = None
     is_accepted: bool
     created_at: datetime
     role: RoleRead
+
+
+class UserSelfUpdate(BaseModel):
+    email: str | None = Field(default=None, max_length=255)
+    first_name: str | None = Field(default=None, min_length=1, max_length=100)
+    second_name: str | None = Field(default=None, min_length=1, max_length=100)
+    patronymic: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=30)
+    vk_contact: str | None = Field(default=None, max_length=255)
+    telegram_contact: str | None = Field(default=None, max_length=255)
+    whatsapp_contact: str | None = Field(default=None, max_length=255)
+    max_contact: str | None = Field(default=None, max_length=255)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        normalized = value.strip().lower()
+        if not normalized:
+            return None
+        if "@" not in normalized or "." not in normalized.split("@")[-1]:
+            raise ValueError("Некорректный email")
+        return normalized
 
 
 class RegisterIn(BaseModel):
@@ -219,6 +248,7 @@ class LessonCreate(BaseModel):
     is_cancelled: bool = False
     is_recurring_weekly: bool = False
     recurrence_until: date | None = None
+    reminder_minutes_before: int | None = Field(default=None, ge=0, le=10080)
 
 
 class LessonUpdate(BaseModel):
@@ -231,6 +261,7 @@ class LessonUpdate(BaseModel):
     comment: str | None = None
     is_cancelled: bool | None = None
     is_recurring_weekly: bool | None = None
+    reminder_minutes_before: int | None = Field(default=None, ge=0, le=10080)
     apply_to_future: bool = False
 
 
@@ -247,6 +278,7 @@ class LessonRead(ORMBase):
     is_cancelled: bool
     is_recurring_weekly: bool
     recurrence_group_id: str | None
+    reminder_minutes_before: int | None
 
 
 class AttendanceUpsert(BaseModel):
@@ -322,6 +354,11 @@ class MakeupAssignIn(BaseModel):
     makeup_teacher_id: int
     makeup_comment: str | None = None
     makeup_completed: bool = False
+
+
+class MakeupCompletionUpdateIn(BaseModel):
+    makeup_completed: bool
+    makeup_comment: str | None = None
 
 
 class MakeupCalendarEventRead(BaseModel):

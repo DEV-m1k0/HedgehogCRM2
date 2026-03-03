@@ -1,14 +1,15 @@
 .page {
   --surface: #ffffff;
-  --surface-soft: #f8fbff;
-  --border: #dbe7f5;
-  --muted: #64748b;
+  --surface-soft: color-mix(in srgb, var(--primary-mute) 22%, #ffffff);
+  --border: color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  --muted: var(--text-dark-mute);
+  --title: var(--text-dark);
   background:
-    radial-gradient(1000px 450px at 0% 0%, #e8f2ff 0%, #ffffff 44%),
+    radial-gradient(1000px 450px at 0% 0%, color-mix(in srgb, var(--primary-mute) 42%, #ffffff) 0%, #ffffff 44%),
     linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border-radius: 14px;
   padding: 24px;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.09);
+  box-shadow: var(--container-box-shadow-default);
 }
 
 .hero {
@@ -16,7 +17,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  border-bottom: 1px solid #dbe7f5;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
   margin-bottom: 16px;
 }
@@ -31,13 +32,14 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #1264a3;
+  color: color-mix(in srgb, var(--primary) 74%, #284357);
 }
 
 .hero h1 {
   margin: 6px 0 2px;
   font-size: 32px;
   line-height: 1.1;
+  color: var(--title);
 }
 
 .subtle {
@@ -53,10 +55,10 @@
 }
 
 .metaBadge {
-  border: 1px solid #d6e3f4;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: #f2f7ff;
-  color: #355d85;
+  background: color-mix(in srgb, var(--primary-mute) 28%, #ffffff);
+  color: color-mix(in srgb, var(--primary) 76%, #263745);
   font-size: 12px;
   font-weight: 700;
   padding: 4px 9px;
@@ -80,12 +82,13 @@
 
 .primaryBtn {
   color: #fff;
-  background: linear-gradient(135deg, #1264a3 0%, #3b82f6 100%);
+  background: var(--primary-gradient);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 42%, #ffffff);
 }
 
 .ghostBtn {
-  color: #243240;
-  background: #e8eef7;
+  color: var(--text-dark);
+  background: color-mix(in srgb, var(--primary-mute) 25%, #edf3f8);
 }
 
 .kpiGrid {
@@ -112,7 +115,7 @@
   display: block;
   margin-top: 4px;
   font-size: 24px;
-  color: #0f172a;
+  color: var(--title);
 }
 
 .grid {
@@ -132,6 +135,16 @@
   grid-column: 1 / -1;
 }
 
+.statsFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 12px;
+}
+
+.statsCard .field {
+  margin: 0;
+}
+
 .card h2 {
   margin: 0 0 12px;
   font-size: 18px;
@@ -141,7 +154,7 @@
   display: grid;
   gap: 2px;
   padding: 8px 0;
-  border-bottom: 1px solid #eef3fa;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-mute) 30%, #e8edf3);
 }
 
 .field:last-child {
@@ -154,14 +167,14 @@
 }
 
 .field strong {
-  color: #0f172a;
+  color: var(--title);
 }
 
 .inlineLink {
   display: inline-flex;
   width: fit-content;
   margin-top: 2px;
-  color: #1264a3;
+  color: color-mix(in srgb, var(--primary) 74%, #284357);
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -181,7 +194,7 @@
 }
 
 .makeupRow {
-  border: 1px solid #e6edf7;
+  border: 1px solid color-mix(in srgb, var(--primary-mute) 32%, #dfe7f0);
   border-radius: 10px;
   padding: 10px;
   display: grid;
@@ -189,13 +202,13 @@
 }
 
 .makeupRow span {
-  color: #475569;
+  color: color-mix(in srgb, var(--text-dark) 74%, #4f6072);
   font-size: 13px;
 }
 
 .makeupStatus {
   font-weight: 700;
-  color: #0f172a !important;
+  color: var(--title) !important;
 }
 
 .error {
@@ -227,6 +240,10 @@
   }
 
   .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsFields {
     grid-template-columns: 1fr;
   }
 }
