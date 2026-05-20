@@ -1,0 +1,242 @@
+/* [project]/src/styles/globals.css [app-client] (css) */
+:root {
+  --primary: #01b8e0;
+  --primary-shadow: #01b8e04d;
+  --primary-shadow-hover: #01b8e099;
+  --primary-mute: #afeeff;
+  --primary-gradient: linear-gradient(90deg, var(--primary), #01c8ff);
+  --primary-gradient-mute: linear-gradient(90deg, var(--primary-mute), #01c8ff4f);
+  --text-dark: #1e293b;
+  --text-dark-mute: #64748b;
+  --transition: .2s ease-in-out;
+  --container-border-radius: 10px;
+  --container-box-shadow-default: 0 4px 8px 0 #0003, 0 6px 20px 0 #00000030;
+  --container-box-shadow-hover: 0 6px 12px 0 #0003, 0 9px 30px 0 #00000030;
+  --sidebar-width: 280px;
+  --error-background: linear-gradient(135deg, #f56565 0%, #ed8936 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity .3s, transform .3s;
+  transform: translateY(0);
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  transform: translateY(-10px);
+}
+
+:focus-visible {
+  outline-offset: 2px;
+  outline: 2px solid #667eea;
+}
+
+/* [project]/src/components/feedback/ConfirmDialog.css [app-client] (css) */
+.confirm-overlay {
+  z-index: 1300;
+  background: #0f172a73;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  display: flex;
+  position: fixed;
+  inset: 0;
+}
+
+.confirm-modal {
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  width: min(100%, 460px);
+  box-shadow: var(--container-box-shadow-default);
+  background: #fff;
+  border-radius: 14px;
+}
+
+.confirm-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-mute) 45%, #dce3ea);
+  padding: 16px 18px 12px;
+}
+
+.confirm-header h2 {
+  color: var(--text-dark);
+  margin: 0;
+  font-size: 18px;
+}
+
+.confirm-body {
+  padding: 14px 18px;
+}
+
+.confirm-body p {
+  color: var(--text-dark-mute);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px 18px;
+  display: flex;
+}
+
+.confirm-btn {
+  cursor: pointer;
+  transition: filter var(--transition);
+  border: none;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-weight: 700;
+}
+
+.confirm-btn:hover {
+  filter: brightness(.96);
+}
+
+.confirm-btn-secondary {
+  background: color-mix(in srgb, var(--primary-mute) 24%, #eef2f7);
+  color: var(--text-dark);
+}
+
+.confirm-btn-primary {
+  color: #fff;
+  background: var(--primary-gradient);
+}
+
+.confirm-btn-danger {
+  color: #fff;
+  background: linear-gradient(135deg, #cf3f52 0%, #b93245 100%);
+}
+
+@media (max-width: 560px) {
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirm-btn {
+    width: 100%;
+  }
+}
+
+/* [project]/src/components/feedback/Notifications.css [app-client] (css) */
+.notifications {
+  z-index: 1200;
+  pointer-events: none;
+  gap: 8px;
+  width: min(360px, 100vw - 32px);
+  display: grid;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+}
+
+.notifications-actions {
+  justify-content: flex-end;
+  display: flex;
+}
+
+.notifications-hide-all {
+  color: #334155;
+  cursor: pointer;
+  pointer-events: auto;
+  background: #ffffffeb;
+  border: 1px solid #d6d9df;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.notifications-hide-all:hover {
+  background: #f8fafc;
+  border-color: #c5d0de;
+}
+
+.notification {
+  color: #0f172a;
+  pointer-events: auto;
+  background: #f8fafc;
+  border: 1px solid #dce6f2;
+  border-radius: 12px;
+  padding: 12px 34px 12px 14px;
+  position: relative;
+  box-shadow: 0 10px 24px #00000029;
+}
+
+.notification--success {
+  background: #ecfdf3;
+  border-color: #b7f5cc;
+}
+
+.notification--error {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.notification--info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.notification-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.notification-text {
+  color: #334155;
+  margin: 0;
+  font-size: 13px;
+}
+
+.notification-close {
+  color: #1e293b;
+  cursor: pointer;
+  background: #0f172a14;
+  border: none;
+  border-radius: 999px;
+  width: 22px;
+  height: 22px;
+  font-size: 15px;
+  line-height: 1;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.notification-close:hover {
+  background: #0f172a24;
+}
+
+@media (max-width: 640px) {
+  .notifications {
+    width: auto;
+    bottom: 10px;
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/*# sourceMappingURL=src_0e740go._.css.map*/

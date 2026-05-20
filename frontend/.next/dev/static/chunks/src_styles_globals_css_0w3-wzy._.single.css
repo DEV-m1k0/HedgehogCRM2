@@ -1,0 +1,57 @@
+/* [project]/src/styles/globals.css [app-client] (css) */
+:root {
+  --primary: #01b8e0;
+  --primary-shadow: #01b8e04d;
+  --primary-shadow-hover: #01b8e099;
+  --primary-mute: #afeeff;
+  --primary-gradient: linear-gradient(90deg, var(--primary), #01c8ff);
+  --primary-gradient-mute: linear-gradient(90deg, var(--primary-mute), #01c8ff4f);
+  --text-dark: #1e293b;
+  --text-dark-mute: #64748b;
+  --transition: .2s ease-in-out;
+  --container-border-radius: 10px;
+  --container-box-shadow-default: 0 4px 8px 0 #0003, 0 6px 20px 0 #00000030;
+  --container-box-shadow-hover: 0 6px 12px 0 #0003, 0 9px 30px 0 #00000030;
+  --sidebar-width: 280px;
+  --error-background: linear-gradient(135deg, #f56565 0%, #ed8936 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity .3s, transform .3s;
+  transform: translateY(0);
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  transform: translateY(-10px);
+}
+
+:focus-visible {
+  outline-offset: 2px;
+  outline: 2px solid #667eea;
+}
+
+/*# sourceMappingURL=src_styles_globals_css_0w3-wzy._.single.css.map*/

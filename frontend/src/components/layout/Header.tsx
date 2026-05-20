@@ -1,13 +1,16 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, Search, User, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import styles from './styles/Header.module.css';
-import type { UserType } from '../../types/User.types';
-import { useNotifications } from '../feedback/Notifications';
-import { clientsApi, coursesApi, dealsApi, groupsApi, metaApi, scheduleApi, tasksApi } from '../../api/crm';
-import type { Client, Course, Deal, Group, Lesson, Task, User as CrmUser } from '../../types/crm.types';
-import { loadTeacherSettings } from '../../utils/teacherSettings';
-import { useAppLanguage } from '../../i18n/AppLanguage';
+import type { UserType } from '@/types/User.types';
+import { useNotifications } from '@/components/feedback/Notifications';
+import { clientsApi, coursesApi, dealsApi, groupsApi, metaApi, scheduleApi, tasksApi } from '@/lib/api/crm';
+import type { Client, Course, Deal, Group, Lesson, Task, User as CrmUser } from '@/types/crm.types';
+import { loadTeacherSettings } from '@/utils/teacherSettings';
+import { useAppLanguage } from '@/i18n/AppLanguage';
+import { resolveApiUrl } from '@/lib/api/client';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -36,15 +39,8 @@ const emptyUser: UserType = {
   created_at: new Date().toISOString(),
   role: { id: 0, name: '' },
 };
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
-const resolveApiUrl = (value?: string | null) => {
-  if (!value) return null;
-  if (value.startsWith('http://') || value.startsWith('https://')) return value;
-  return `${API_BASE_URL}${value}`;
-};
-
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMobileMenuOpen = false }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { language } = useAppLanguage();
   const isEn = language === 'en';
@@ -354,7 +350,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
                       type="button"
                       className={styles.searchResultItem}
                       onClick={() => {
-                        navigate(item.href);
+                        router.push(item.href);
                         setIsSearchOpen(false);
                         setSearchQuery('');
                       }}
@@ -411,7 +407,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
                       onClick={() => {
                         markAsRead(item.id);
                         if (item.href) {
-                          navigate(item.href);
+                          router.push(item.href);
                           setIsNotificationsOpen(false);
                         }
                       }}
@@ -434,7 +430,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarCollapsed, isMo
         <button
           type="button"
           className={styles.userMenu}
-          onClick={() => navigate('/account')}
+          onClick={() => router.push('/account')}
           aria-label={isEn ? 'Open profile' : 'Открыть профиль'}
         >
           <div className={styles.avatar}>

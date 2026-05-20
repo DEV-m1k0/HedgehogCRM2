@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import type { InputProps } from './Input.types';
 import styles from './Input.module.scss';

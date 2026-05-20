@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/antonknyazev/Desktop/HedgehogCRM2/frontend/src/app/not-found.tsx"],"sourcesContent":["'use client';\n\nimport Link from 'next/link';\n\nexport default function NotFound() {\n  return (\n    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '16px' }}>\n      <h1>404</h1>\n      <p>Страница не найдена</p>\n      <Link href=\"/\" style={{ color: 'var(--primary)' }}>На главную</Link>\n    </div>\n  );\n}\n"],"names":["NotFound","style","display","flexDirection","alignItems","justifyContent","minHeight","gap","href","color"],"mappings":";;;;;AAEA;AAFA;;;AAIe,SAASA;IACtB,qBACE,8OAAC;QAAIC,OAAO;YAAEC,SAAS;YAAQC,eAAe;YAAUC,YAAY;YAAUC,gBAAgB;YAAUC,WAAW;YAASC,KAAK;QAAO;;0BACtI,8OAAC;0BAAG;;;;;;0BACJ,8OAAC;0BAAE;;;;;;0BACH,8OAAC,uKAAI;gBAACC,MAAK;gBAAIP,OAAO;oBAAEQ,OAAO;gBAAiB;0BAAG;;;;;;;;;;;;AAGzD"}}]
+}

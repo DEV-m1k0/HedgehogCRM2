@@ -1,0 +1,192 @@
+/* [project]/src/pages/Settings/SettingsPage.module.css [app-client] (css) */
+.SettingsPage-module__P1MKlG__page {
+  box-shadow: var(--container-box-shadow-default);
+  background: #fff;
+  border-radius: 12px;
+  gap: 14px;
+  padding: 20px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__header h1 {
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.SettingsPage-module__P1MKlG__header p {
+  color: var(--text-dark-mute);
+  margin: 6px 0 0;
+}
+
+.SettingsPage-module__P1MKlG__card {
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, #dce4ee);
+  border-radius: 12px;
+  gap: 12px;
+  padding: 14px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__card h2 {
+  color: var(--text-dark);
+  margin: 0;
+  font-size: 18px;
+}
+
+.SettingsPage-module__P1MKlG__layout {
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__floatingNav {
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, #dce4ee);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--primary-shadow) 26%, #fff);
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  position: sticky;
+  top: 88px;
+}
+
+.SettingsPage-module__P1MKlG__navTitle {
+  color: var(--text-dark-mute);
+  margin: 0 0 8px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.SettingsPage-module__P1MKlG__navList {
+  gap: 6px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__navItem {
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, #d9e2ec);
+  color: var(--text-dark);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.SettingsPage-module__P1MKlG__navItem:hover {
+  background: color-mix(in srgb, var(--primary-mute) 24%, #fff);
+}
+
+.SettingsPage-module__P1MKlG__navItemActive {
+  border-color: color-mix(in srgb, var(--primary) 35%, #c4d5e8);
+  background: color-mix(in srgb, var(--primary-mute) 34%, #fff);
+  color: color-mix(in srgb, var(--primary) 80%, var(--text-dark));
+  font-weight: 700;
+}
+
+.SettingsPage-module__P1MKlG__content {
+  gap: 12px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__field {
+  gap: 5px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__field span {
+  color: var(--text-dark-mute);
+  font-size: 12px;
+}
+
+.SettingsPage-module__P1MKlG__field select {
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #d5deea);
+  width: 100%;
+  font: inherit;
+  color: var(--text-dark);
+  background: #fff;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.SettingsPage-module__P1MKlG__toggles {
+  gap: 8px;
+  display: grid;
+}
+
+.SettingsPage-module__P1MKlG__toggle {
+  border: 1px solid color-mix(in srgb, var(--primary-mute) 55%, #dbe6f2);
+  color: var(--text-dark);
+  border-radius: 9px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  display: flex;
+}
+
+.SettingsPage-module__P1MKlG__toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.SettingsPage-module__P1MKlG__actions {
+  justify-content: flex-end;
+  gap: 8px;
+  display: flex;
+}
+
+.SettingsPage-module__P1MKlG__primary, .SettingsPage-module__P1MKlG__secondary {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 700;
+}
+
+.SettingsPage-module__P1MKlG__primary {
+  background: var(--primary-gradient);
+  color: #fff;
+  border: none;
+}
+
+.SettingsPage-module__P1MKlG__secondary {
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #d5deea);
+  color: var(--text-dark);
+  background: #fff;
+}
+
+.SettingsPage-module__P1MKlG__muted {
+  color: var(--text-dark-mute);
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .SettingsPage-module__P1MKlG__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .SettingsPage-module__P1MKlG__floatingNav {
+    position: static;
+    top: auto;
+  }
+
+  .SettingsPage-module__P1MKlG__navList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .SettingsPage-module__P1MKlG__actions {
+    flex-direction: column-reverse;
+  }
+
+  .SettingsPage-module__P1MKlG__primary, .SettingsPage-module__P1MKlG__secondary {
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=src_pages_Settings_SettingsPage_module_0xffjg7.css.map*/

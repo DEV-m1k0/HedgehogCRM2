@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///Users/antonknyazev/Desktop/HedgehogCRM2/frontend/src/app/%28dashboard%29/makeups/page.tsx"],"sourcesContent":["import { redirect } from 'next/navigation';\n\nexport default function Page() {\n  redirect('/calendar');\n}\n"],"names":["Page"],"mappings":";;;;AAAA;AAAA;;AAEe,SAASA;IACtB,IAAA,iMAAQ,EAAC;AACX"}}]
+}

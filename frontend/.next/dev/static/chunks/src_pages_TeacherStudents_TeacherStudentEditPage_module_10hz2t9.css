@@ -1,0 +1,175 @@
+/* [project]/src/pages/TeacherStudents/TeacherStudentEditPage.module.css [app-client] (css) */
+.TeacherStudentEditPage-module__CDD0EW__page {
+  --surface: #fff;
+  --surface-soft: color-mix(in srgb, var(--primary-mute) 24%, #fff);
+  --border: color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  --muted: var(--text-dark-mute);
+  --title: var(--text-dark);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-mute) 36%, #fff) 0%, #fff 45%);
+  box-shadow: var(--container-box-shadow-default);
+  border-radius: 14px;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  padding: 22px;
+  display: flex;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__header {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  display: flex;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__header h1 {
+  color: var(--title);
+  margin: 0 0 4px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__header p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__back {
+  color: color-mix(in srgb, var(--primary) 74%, #2a3f55);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__back:hover {
+  color: var(--primary);
+}
+
+.TeacherStudentEditPage-module__CDD0EW__form {
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  display: flex;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__section {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__section h2 {
+  color: var(--title);
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__fieldsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  display: grid;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__field {
+  gap: 6px;
+  display: grid;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__field span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__input {
+  border: 1px solid var(--border);
+  font: inherit;
+  color: var(--text-dark);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__input:focus {
+  border-color: color-mix(in srgb, var(--primary) 44%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 58%, #fff);
+  outline: none;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__actions {
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__primary, .TeacherStudentEditPage-module__CDD0EW__danger {
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__primary {
+  background: var(--primary-gradient);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 42%, #fff);
+}
+
+.TeacherStudentEditPage-module__CDD0EW__danger {
+  background: linear-gradient(135deg, #cf3f52 0%, #ba2d42 100%);
+}
+
+.TeacherStudentEditPage-module__CDD0EW__secondary {
+  background: var(--surface-soft);
+  color: var(--text-dark);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__dangerZone {
+  background: #fcf1f2;
+  border: 1px solid #e9aab2;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__dangerZone h3 {
+  color: #9f1239;
+  margin: 0 0 6px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__dangerZone p {
+  color: #7f1d1d;
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.TeacherStudentEditPage-module__CDD0EW__loading {
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .TeacherStudentEditPage-module__CDD0EW__page {
+    padding: 16px;
+  }
+
+  .TeacherStudentEditPage-module__CDD0EW__header {
+    flex-direction: column;
+  }
+
+  .TeacherStudentEditPage-module__CDD0EW__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .TeacherStudentEditPage-module__CDD0EW__secondary, .TeacherStudentEditPage-module__CDD0EW__primary {
+    text-align: center;
+  }
+}
+
+/*# sourceMappingURL=src_pages_TeacherStudents_TeacherStudentEditPage_module_10hz2t9.css.map*/

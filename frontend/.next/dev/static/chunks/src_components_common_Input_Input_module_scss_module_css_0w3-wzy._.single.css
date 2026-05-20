@@ -1,0 +1,81 @@
+/* [project]/src/components/common/Input/Input.module.scss.module.css [app-client] (css) */
+.Input-module-scss-module__Dv-hiG__formGroup {
+  flex-direction: column;
+  gap: .5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__required:after {
+  content: "*";
+  color: red;
+  margin-left: 5px;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup > div {
+  width: 100%;
+  position: relative;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup > div:focus-within .Input-module-scss-module__Dv-hiG__icon {
+  color: var(--primary);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__icon {
+  color: var(--text-dark-mute);
+  transition: var(--transition);
+  font-size: 18px;
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__passwordToggleIcon {
+  color: var(--text-dark-mute);
+  cursor: pointer;
+  background-color: #0000;
+  border: none;
+  width: fit-content;
+  font-size: 18px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 15px !important;
+  left: unset !important;
+  animation: Input-module-scss-module__Dv-hiG__unset !important;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl {
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--text-dark);
+  transition: var(--transition);
+  border: 2px solid #e8e8e8;
+  border-radius: 15px;
+  padding: 16px 20px 16px 45px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl:hover {
+  border-color: var(--primary-mute);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 4px var(--primary);
+  outline: none;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl[type="password"] {
+  padding-right: 45px;
+}
+
+/*# sourceMappingURL=src_components_common_Input_Input_module_scss_module_css_0w3-wzy._.single.css.map*/

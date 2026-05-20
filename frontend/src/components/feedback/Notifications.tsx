@@ -1,6 +1,8 @@
+'use client';
+
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { User } from '../../types/crm.types';
-import { loadTeacherSettings } from '../../utils/teacherSettings';
+import type { User } from '@/types/crm.types';
+import { loadTeacherSettings } from '@/utils/teacherSettings';
 import './Notifications.css';
 
 export type NotifyType = 'success' | 'error' | 'info';

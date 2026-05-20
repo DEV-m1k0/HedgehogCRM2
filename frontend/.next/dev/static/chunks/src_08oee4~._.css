@@ -1,0 +1,326 @@
+/* [project]/src/pages/Login/LoginPage.module.scss.module.css [app-client] (css) */
+.LoginPage-module-scss-module__5-ihFq__container {
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.LoginPage-module-scss-module__5-ihFq__containerPanel {
+  border-radius: var(--container-border-radius);
+  transition: var(--transition);
+  box-shadow: var(--container-box-shadow-default);
+  display: flex;
+}
+
+.LoginPage-module-scss-module__5-ihFq__containerPanel:hover {
+  box-shadow: var(--container-box-shadow-hover);
+}
+
+.LoginPage-module-scss-module__5-ihFq__panel {
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  padding: 40px;
+  display: flex;
+}
+
+/* [project]/src/components/ui/auth/InfoPanel/InfoPanel.module.scss.module.css [app-client] (css) */
+.InfoPanel-module-scss-module__Ik2coa__panel {
+  flex-direction: column;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel {
+  color: #fff;
+  border-radius: var(--container-border-radius) 0 0 var(--container-border-radius);
+  background: linear-gradient(135deg, var(--primary), #01c8ff);
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel p {
+  max-width: 500px;
+  margin-top: 10px;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul {
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 40px;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul li {
+  align-items: center;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul li p {
+  margin: 0;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle {
+  background-color: #fff3;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  position: relative;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle svg {
+  color: #fff;
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle .InfoPanel-module-scss-module__Ik2coa__number {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* [project]/src/components/common/Button/Button.module.scss.module.css [app-client] (css) */
+.Button-module-scss-module__MUOPYq__button {
+  background: var(--primary-gradient);
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 18px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.Button-module-scss-module__MUOPYq__button:disabled {
+  opacity: .5;
+  cursor: not-allowed !important;
+}
+
+/* [project]/src/components/common/Input/Input.module.scss.module.css [app-client] (css) */
+.Input-module-scss-module__Dv-hiG__formGroup {
+  flex-direction: column;
+  gap: .5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__required:after {
+  content: "*";
+  color: red;
+  margin-left: 5px;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup > div {
+  width: 100%;
+  position: relative;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup > div:focus-within .Input-module-scss-module__Dv-hiG__icon {
+  color: var(--primary);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__icon {
+  color: var(--text-dark-mute);
+  transition: var(--transition);
+  font-size: 18px;
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__passwordToggleIcon {
+  color: var(--text-dark-mute);
+  cursor: pointer;
+  background-color: #0000;
+  border: none;
+  width: fit-content;
+  font-size: 18px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 15px !important;
+  left: unset !important;
+  animation: Input-module-scss-module__Dv-hiG__unset !important;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl {
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--text-dark);
+  transition: var(--transition);
+  border: 2px solid #e8e8e8;
+  border-radius: 15px;
+  padding: 16px 20px 16px 45px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl:hover {
+  border-color: var(--primary-mute);
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 4px var(--primary);
+  outline: none;
+}
+
+.Input-module-scss-module__Dv-hiG__formGroup .Input-module-scss-module__Dv-hiG__formControl[type="password"] {
+  padding-right: 45px;
+}
+
+/* [project]/src/components/common/Input/CheckBoxInput.module.scss.module.css [app-client] (css) */
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox {
+  align-items: center;
+  gap: 5px;
+  display: flex;
+}
+
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox .CheckBoxInput-module-scss-module__4QvF_a__formControlCheckbox {
+  accent-color: var(--primary);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox label {
+  cursor: pointer;
+}
+
+/* [project]/src/components/ui/auth/FormPanel/FormPanel.module.scss.module.css [app-client] (css) */
+.FormPanel-module-scss-module__YuU07G__panel {
+  flex-direction: column;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel {
+  border-radius: 0 var(--container-border-radius) var(--container-border-radius) 0;
+  background-color: #fff;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel label {
+  color: var(--text-dark);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel h1 {
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel p {
+  color: var(--text-dark-mute);
+  margin-top: 10px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel form {
+  margin-top: 40px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__tripleInput {
+  gap: 10px;
+  display: flex;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__tripleInput input {
+  padding-left: 16px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__loginButton {
+  background: var(--primary-gradient);
+  color: #fff;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+  border: none;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-radius: 15px !important;
+  padding: 15px 0 !important;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__loginButton:hover {
+  transform: scale(1.03);
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage {
+  text-align: center;
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a {
+  color: var(--primary);
+  padding: 5px 0;
+  font-weight: 600;
+  text-decoration: none;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-backward-underline-link;
+  position: relative;
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:hover {
+  transition: var(--transition);
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:hover:before {
+  content: "";
+  background-color: var(--primary);
+  width: 100%;
+  height: 2px;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-forward-underline-link;
+  position: absolute;
+  bottom: 0;
+}
+
+@keyframes FormPanel-module-scss-module__YuU07G__effect-forward-underline-link {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:before {
+  content: "";
+  background-color: var(--primary);
+  width: 0;
+  height: 2px;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-backward-underline-link;
+  position: absolute;
+  bottom: 0;
+}
+
+@keyframes FormPanel-module-scss-module__YuU07G__effect-backward-underline-link {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0;
+  }
+}
+
+/*# sourceMappingURL=src_08oee4~._.css.map*/

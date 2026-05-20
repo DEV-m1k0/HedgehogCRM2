@@ -1,0 +1,325 @@
+/* [project]/src/pages/TeacherStudents/TeacherStudentsPage.module.css [app-client] (css) */
+.TeacherStudentsPage-module__8-ytBW__page {
+  --surface-bg: #fff;
+  --surface-soft: #f8fbff;
+  --border: color-mix(in srgb, var(--primary) 24%, #d7e0ea);
+  --text-muted: var(--text-dark-mute);
+  --accent: var(--primary);
+  --accent-soft: color-mix(in srgb, var(--primary) 18%, #fff);
+  --title: var(--text-dark);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-mute) 40%, #fff) 0%, #fff 35%);
+  box-shadow: var(--container-box-shadow-default);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__header h1 {
+  color: var(--title);
+  margin: 0 0 4px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__header p {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.TeacherStudentsPage-module__8-ytBW__statsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__statCard {
+  border: 1px solid var(--border);
+  background: var(--surface-bg);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__statCard span {
+  color: var(--text-muted);
+  font-size: 13px;
+  display: block;
+}
+
+.TeacherStudentsPage-module__8-ytBW__statCard strong {
+  color: var(--title);
+  margin-top: 4px;
+  font-size: 24px;
+  display: block;
+}
+
+.TeacherStudentsPage-module__8-ytBW__filters {
+  grid-template-columns: minmax(240px, 1fr) minmax(180px, 260px) minmax(210px, 260px);
+  align-items: end;
+  gap: 10px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__searchWrap, .TeacherStudentsPage-module__8-ytBW__groupFilterWrap, .TeacherStudentsPage-module__8-ytBW__layoutWrap {
+  gap: 6px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__searchWrap label, .TeacherStudentsPage-module__8-ytBW__groupFilterWrap label, .TeacherStudentsPage-module__8-ytBW__layoutWrap span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.TeacherStudentsPage-module__8-ytBW__search, .TeacherStudentsPage-module__8-ytBW__groupFilter {
+  border: 1px solid var(--border);
+  width: 100%;
+  font: inherit;
+  color: var(--text-dark);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__search:focus, .TeacherStudentsPage-module__8-ytBW__groupFilter:focus {
+  border-color: color-mix(in srgb, var(--primary) 42%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-shadow) 60%, #fff);
+  outline: none;
+}
+
+.TeacherStudentsPage-module__8-ytBW__layoutSwitch {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__layoutBtn, .TeacherStudentsPage-module__8-ytBW__layoutBtnActive {
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.TeacherStudentsPage-module__8-ytBW__layoutBtn {
+  color: var(--text-dark-mute);
+  background: none;
+}
+
+.TeacherStudentsPage-module__8-ytBW__layoutBtn:hover {
+  color: var(--text-dark);
+  background: #f2f5f9;
+}
+
+.TeacherStudentsPage-module__8-ytBW__layoutBtnActive {
+  color: #fff;
+  background: var(--primary-gradient);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary-shadow) 45%, #fff);
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupList {
+  gap: 14px;
+  margin-top: 16px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupCard {
+  border: 1px solid var(--border);
+  background: var(--surface-bg);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupHead {
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+  display: flex;
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupHead h2 {
+  color: var(--title);
+  margin: 0;
+  font-size: 18px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupHead span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__groupMeta {
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, #d6e4f0);
+  background: var(--accent-soft);
+  color: color-mix(in srgb, var(--primary) 75%, #233444);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsList {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__studentCard {
+  grid-template-columns: minmax(260px, 1.25fr) minmax(170px, 1fr) minmax(190px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  display: grid;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__studentTop {
+  margin-bottom: 0;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__studentCard p {
+  margin: 0;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__actions {
+  justify-self: end;
+  margin-top: 0;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCard {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 12px;
+  transition: border-color .18s, box-shadow .18s, transform .18s;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCardLink {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCard:hover {
+  border-color: color-mix(in srgb, var(--primary) 36%, #d1dce7);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--primary-shadow) 35%, #fff);
+  transform: translateY(-1px);
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCardLink:focus-visible .TeacherStudentsPage-module__8-ytBW__studentCard {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, #fff);
+  outline-offset: 2px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentTop {
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentAvatar {
+  background: var(--accent-soft);
+  width: 38px;
+  height: 38px;
+  color: color-mix(in srgb, var(--primary) 70%, #1f2d3a);
+  letter-spacing: .03em;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  display: inline-flex;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentName {
+  color: var(--title);
+  display: block;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentParent {
+  color: var(--text-muted);
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCard p {
+  color: color-mix(in srgb, var(--text-dark) 76%, #4f6072);
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.TeacherStudentsPage-module__8-ytBW__studentCard p span {
+  color: var(--title);
+  font-weight: 600;
+}
+
+.TeacherStudentsPage-module__8-ytBW__actions {
+  gap: 8px;
+  margin-top: 10px;
+  display: flex;
+}
+
+.TeacherStudentsPage-module__8-ytBW__linkBtn, .TeacherStudentsPage-module__8-ytBW__linkBtnSecondary {
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.TeacherStudentsPage-module__8-ytBW__linkBtn {
+  background: var(--primary-gradient);
+  color: #fff;
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary-shadow) 45%, #fff);
+}
+
+.TeacherStudentsPage-module__8-ytBW__linkBtnSecondary {
+  color: #243240;
+  background: #e8eef7;
+}
+
+.TeacherStudentsPage-module__8-ytBW__empty {
+  color: var(--text-muted);
+  margin-top: 14px;
+}
+
+@media (max-width: 860px) {
+  .TeacherStudentsPage-module__8-ytBW__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .TeacherStudentsPage-module__8-ytBW__layoutSwitch {
+    max-width: 300px;
+  }
+
+  .TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__studentCard {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .TeacherStudentsPage-module__8-ytBW__studentsList .TeacherStudentsPage-module__8-ytBW__actions {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .TeacherStudentsPage-module__8-ytBW__page {
+    padding: 16px;
+  }
+
+  .TeacherStudentsPage-module__8-ytBW__studentsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*# sourceMappingURL=src_pages_TeacherStudents_TeacherStudentsPage_module_0mpqtps.css.map*/

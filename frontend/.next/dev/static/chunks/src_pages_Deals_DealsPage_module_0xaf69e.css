@@ -1,0 +1,416 @@
+/* [project]/src/pages/Deals/DealsPage.module.css [app-client] (css) */
+.DealsPage-module__Mi8k5a__page {
+  --surface: #fff;
+  --surface-soft: #f8fbff;
+  --border: #dbe7f5;
+  --muted: #64748b;
+  background: radial-gradient(1000px 450px at 0 0, #e8f2ff 0%, #fff 45%);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 10px 30px #0f172a14;
+}
+
+.DealsPage-module__Mi8k5a__header {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  display: flex;
+}
+
+.DealsPage-module__Mi8k5a__header h1 {
+  margin: 0 0 4px;
+}
+
+.DealsPage-module__Mi8k5a__header p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.DealsPage-module__Mi8k5a__primaryBtn, .DealsPage-module__Mi8k5a__secondaryBtn, .DealsPage-module__Mi8k5a__dangerBtn, .DealsPage-module__Mi8k5a__successBtn, .DealsPage-module__Mi8k5a__warningBtn {
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.DealsPage-module__Mi8k5a__primaryBtn {
+  color: #fff;
+  background: #1264a3;
+}
+
+.DealsPage-module__Mi8k5a__secondaryBtn {
+  color: #243240;
+  background: #e8eef7;
+}
+
+.DealsPage-module__Mi8k5a__dangerBtn {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.DealsPage-module__Mi8k5a__successBtn {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.DealsPage-module__Mi8k5a__warningBtn {
+  color: #9a3412;
+  background: #ffedd5;
+}
+
+.DealsPage-module__Mi8k5a__primaryBtn:disabled, .DealsPage-module__Mi8k5a__secondaryBtn:disabled, .DealsPage-module__Mi8k5a__dangerBtn:disabled, .DealsPage-module__Mi8k5a__successBtn:disabled, .DealsPage-module__Mi8k5a__warningBtn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.DealsPage-module__Mi8k5a__statsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__statCard {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.DealsPage-module__Mi8k5a__statCard span {
+  color: var(--muted);
+  font-size: 12px;
+  display: block;
+}
+
+.DealsPage-module__Mi8k5a__statCard strong {
+  color: #0f172a;
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.05;
+  display: block;
+}
+
+.DealsPage-module__Mi8k5a__statCard small {
+  color: #475569;
+  margin-top: 5px;
+  font-size: 12px;
+  display: block;
+}
+
+.DealsPage-module__Mi8k5a__toolbar {
+  grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(170px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__toolbarManager {
+  grid-template-columns: minmax(220px, 2fr) minmax(180px, 1fr);
+}
+
+.DealsPage-module__Mi8k5a__search, .DealsPage-module__Mi8k5a__input, .DealsPage-module__Mi8k5a__select {
+  font: inherit;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #d6d9df;
+  border-radius: 10px;
+  width: 100%;
+  padding: 10px 12px;
+}
+
+.DealsPage-module__Mi8k5a__error {
+  color: #861313;
+  background: #ffe7e7;
+  border-radius: 8px;
+  margin-top: 12px;
+  padding: 10px;
+}
+
+.DealsPage-module__Mi8k5a__form {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__form h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.DealsPage-module__Mi8k5a__formGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__formGrid label, .DealsPage-module__Mi8k5a__cardControls label {
+  color: #475569;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__clientPicker {
+  position: relative;
+}
+
+.DealsPage-module__Mi8k5a__clientDropdown {
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #d6d9df;
+  border-radius: 10px;
+  max-height: 240px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px #0f172a24;
+}
+
+.DealsPage-module__Mi8k5a__clientOption {
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  display: flex;
+}
+
+.DealsPage-module__Mi8k5a__clientOption:hover {
+  background: #f1f7ff;
+}
+
+.DealsPage-module__Mi8k5a__clientOption small {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.DealsPage-module__Mi8k5a__clientEmpty {
+  color: #64748b;
+  margin: 0;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.DealsPage-module__Mi8k5a__formActions {
+  justify-content: flex-end;
+  gap: 10px;
+  display: flex;
+}
+
+.DealsPage-module__Mi8k5a__pipeline {
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 14px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__stageColumn {
+  border: 1px solid var(--border);
+  background: #f8fbff;
+  border-radius: 12px;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  min-height: 220px;
+  max-height: calc(100vh - 230px);
+  display: grid;
+  overflow: hidden;
+}
+
+.DealsPage-module__Mi8k5a__stageHead {
+  z-index: 2;
+  background: #f8fbff;
+  border-bottom: 1px solid #dbe7f5;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  display: flex;
+  position: sticky;
+  top: 0;
+}
+
+.DealsPage-module__Mi8k5a__stageHead h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.DealsPage-module__Mi8k5a__stageHead span {
+  color: #1e293b;
+  background: #e2e8f0;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.DealsPage-module__Mi8k5a__stageEmpty {
+  color: var(--muted);
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  display: flex;
+}
+
+.DealsPage-module__Mi8k5a__stageCards {
+  scrollbar-gutter: stable;
+  align-content: start;
+  gap: 10px;
+  padding: 10px;
+  display: grid;
+  overflow-y: auto;
+}
+
+.DealsPage-module__Mi8k5a__card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 12px;
+  gap: 8px;
+  padding: 10px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__cardHead {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  display: flex;
+}
+
+.DealsPage-module__Mi8k5a__statusBadge {
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.DealsPage-module__Mi8k5a__status-active {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.DealsPage-module__Mi8k5a__status-won {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.DealsPage-module__Mi8k5a__status-lost {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.DealsPage-module__Mi8k5a__status-paused {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.DealsPage-module__Mi8k5a__line {
+  color: #334155;
+  margin: 0;
+  font-size: 13px;
+}
+
+.DealsPage-module__Mi8k5a__line span {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.DealsPage-module__Mi8k5a__clientLink {
+  color: #1264a3;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.DealsPage-module__Mi8k5a__clientLink:hover {
+  text-decoration: underline;
+}
+
+.DealsPage-module__Mi8k5a__cardControls {
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 8px;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__cardActions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  display: grid;
+}
+
+.DealsPage-module__Mi8k5a__cardActions button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.DealsPage-module__Mi8k5a__empty {
+  color: var(--muted);
+  margin-top: 14px;
+}
+
+@media (max-width: 1240px) {
+  .DealsPage-module__Mi8k5a__pipeline {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .DealsPage-module__Mi8k5a__toolbar, .DealsPage-module__Mi8k5a__toolbarManager {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .DealsPage-module__Mi8k5a__search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .DealsPage-module__Mi8k5a__page {
+    padding: 16px;
+  }
+
+  .DealsPage-module__Mi8k5a__header, .DealsPage-module__Mi8k5a__formActions {
+    flex-direction: column;
+  }
+
+  .DealsPage-module__Mi8k5a__cardActions, .DealsPage-module__Mi8k5a__pipeline {
+    grid-template-columns: 1fr;
+  }
+
+  .DealsPage-module__Mi8k5a__stageColumn {
+    max-height: none;
+  }
+
+  .DealsPage-module__Mi8k5a__cardControls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .DealsPage-module__Mi8k5a__toolbar, .DealsPage-module__Mi8k5a__toolbarManager {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*# sourceMappingURL=src_pages_Deals_DealsPage_module_0xaf69e.css.map*/

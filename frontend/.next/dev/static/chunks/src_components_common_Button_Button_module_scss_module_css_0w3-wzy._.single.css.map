@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///turbopack:///[project]/src/components/common/Button/Button.module.scss"],"sourcesContent":[".button {\n    border-radius: 5px;\n    background: var(--primary-gradient);\n    border: none;\n    color: white;\n    text-align: center;\n    text-decoration: none;\n    display: inline-block;\n    font-size: 18px;\n    cursor: pointer;\n    padding: 10px 20px;\n}\n\n.button:disabled {\n    cursor: not-allowed !important;\n    opacity: 0.5;\n}"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;AAaA"}}]
+}

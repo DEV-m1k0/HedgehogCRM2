@@ -1,0 +1,11 @@
+{
+  "[project]/src/pages/Schedule/SchedulePage.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/src/pages/Schedule/SchedulePage.tsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/node_modules_0.u0vp7._.js",
+      "static/chunks/src_pages_Schedule_SchedulePage_tsx_0-mapaa._.js",
+      "static/chunks/src_pages_Schedule_Schedule_0o11ul0.css",
+      "static/chunks/src_pages_Schedule_SchedulePage_tsx_069b79d._.js"
+    ]
+  }
+}

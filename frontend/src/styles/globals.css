@@ -1,0 +1,55 @@
+:root {
+    --primary: #01b8e0;
+    --primary-shadow: rgba(1, 184, 224, 0.3);
+    --primary-shadow-hover: rgba(1, 184, 224, 0.6);
+    --primary-mute: #afeeff;
+    --primary-gradient: linear-gradient(90deg, var(--primary), #01c8ff);
+    --primary-gradient-mute: linear-gradient(90deg, var(--primary-mute), #01c8ff4f);
+    --text-dark: #1e293b;
+    --text-dark-mute: #64748b;
+    --transition: 0.2s ease-in-out;
+    --container-border-radius: 10px;
+    --container-box-shadow-default: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    --container-box-shadow-hover: 0 6px 12px 0 rgba(0, 0, 0, 0.2), 0 9px 30px 0 rgba(0, 0, 0, 0.19);
+    --sidebar-width: 280px;
+    --error-background: linear-gradient(135deg, #f56565 0%, #ed8936 100%);
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+ul {
+    list-style: none;
+    padding: 0
+}
+
+/* Animations */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}

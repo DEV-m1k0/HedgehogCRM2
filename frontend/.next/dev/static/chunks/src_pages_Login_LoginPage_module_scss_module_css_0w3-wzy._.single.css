@@ -1,0 +1,29 @@
+/* [project]/src/pages/Login/LoginPage.module.scss.module.css [app-client] (css) */
+.LoginPage-module-scss-module__5-ihFq__container {
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.LoginPage-module-scss-module__5-ihFq__containerPanel {
+  border-radius: var(--container-border-radius);
+  transition: var(--transition);
+  box-shadow: var(--container-box-shadow-default);
+  display: flex;
+}
+
+.LoginPage-module-scss-module__5-ihFq__containerPanel:hover {
+  box-shadow: var(--container-box-shadow-hover);
+}
+
+.LoginPage-module-scss-module__5-ihFq__panel {
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  padding: 40px;
+  display: flex;
+}
+
+/*# sourceMappingURL=src_pages_Login_LoginPage_module_scss_module_css_0w3-wzy._.single.css.map*/

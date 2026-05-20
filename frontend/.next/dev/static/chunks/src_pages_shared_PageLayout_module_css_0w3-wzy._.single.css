@@ -1,0 +1,75 @@
+/* [project]/src/pages/shared/PageLayout.module.css [app-client] (css) */
+.PageLayout-module__eFCwya__page {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px #0000001a;
+}
+
+.PageLayout-module__eFCwya__title {
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.PageLayout-module__eFCwya__form {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  display: grid;
+}
+
+.PageLayout-module__eFCwya__input, .PageLayout-module__eFCwya__select, .PageLayout-module__eFCwya__button {
+  border: 1px solid #d6d9df;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.PageLayout-module__eFCwya__button {
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+.PageLayout-module__eFCwya__buttonSecondary {
+  color: #243240;
+  cursor: pointer;
+  background: #eceff3;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.PageLayout-module__eFCwya__grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  display: grid;
+}
+
+.PageLayout-module__eFCwya__card {
+  border: 1px solid #e5e9f0;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.PageLayout-module__eFCwya__row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  display: flex;
+}
+
+.PageLayout-module__eFCwya__muted {
+  color: var(--text-dark-mute);
+  font-size: 14px;
+}
+
+.PageLayout-module__eFCwya__error {
+  color: #861313;
+  background: #ffe7e7;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+}
+
+/*# sourceMappingURL=src_pages_shared_PageLayout_module_css_0w3-wzy._.single.css.map*/

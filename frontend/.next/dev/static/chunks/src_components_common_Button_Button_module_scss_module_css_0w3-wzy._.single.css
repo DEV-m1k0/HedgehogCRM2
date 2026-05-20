@@ -1,0 +1,20 @@
+/* [project]/src/components/common/Button/Button.module.scss.module.css [app-client] (css) */
+.Button-module-scss-module__MUOPYq__button {
+  background: var(--primary-gradient);
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 18px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.Button-module-scss-module__MUOPYq__button:disabled {
+  opacity: .5;
+  cursor: not-allowed !important;
+}
+
+/*# sourceMappingURL=src_components_common_Button_Button_module_scss_module_css_0w3-wzy._.single.css.map*/

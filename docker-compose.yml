@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hedgehog
+      POSTGRES_PASSWORD: hedgehog_secret
+      POSTGRES_DB: hedgehog_crm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hedgehog -d hedgehog_crm"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://hedgehog:hedgehog_secret@db:5432/hedgehog_crm
+      CORS_ALLOW_ORIGINS: "http://localhost,http://localhost:80,http://localhost:3000"
+      JWT_SECRET: change-me-in-production-very-long-random-secret
+      JWT_ACCESS_MINUTES: "15"
+      JWT_REFRESH_DAYS: "14"
+      JWT_COOKIE_SECURE: "false"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - backend_media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ""
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdata:
+  backend_media:

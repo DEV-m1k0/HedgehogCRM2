@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Button } from '@components/common/Button/Button';
 import { Input } from '@components/common/Input/Input';
@@ -5,7 +7,7 @@ import { CheckBoxInput } from '@components/common/Input/CheckBoxInput';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from './FormPanel.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import type { FormPanelProps } from './FormPanel.types';
 
 const getInputValue = (formValues: object, fieldName: string): string | number => {
@@ -106,7 +108,7 @@ export const FormPanel: React.FC<FormPanelProps> = ({
         />
       </form>
       <p className={styles.switchPage}>
-        {link.pText} <Link to={link.pathname}>{link.linkText}</Link>
+        {link.pText} <Link href={link.pathname}>{link.linkText}</Link>
       </p>
     </div>
   );

@@ -1,0 +1,110 @@
+.panel {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+}
+.formPanel {
+    border-radius: 0 var(--container-border-radius) var(--container-border-radius) 0;
+    background-color: white;
+}
+
+.formPanel label {
+    color: var(--text-dark);
+    user-select: none;
+}
+
+.formPanel h1 {
+    color: var(--text-dark);
+    margin: 0;
+}
+.formPanel p {
+    color: var(--text-dark-mute);
+    margin-top: 10px;
+}
+
+.formPanel form {
+    margin-top: 40px;
+}
+
+.formPanel .tripleInput {
+    display: flex;
+    gap: 10px;
+}
+
+.formPanel .tripleInput input {
+    padding-left: 16px;
+}
+
+
+.formPanel .loginButton {
+    width: 100%;
+    font-weight: 600;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding: 15px 0 !important;
+    border-radius: 15px !important;
+    border: none;
+    background: var(--primary-gradient);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+
+    &:hover {
+        transform: scale(1.03);
+    }
+}
+
+.switchPage {
+    text-align: center;
+}
+
+.switchPage a {
+    position: relative;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    animation: effect-backward-underline-link 0.3s ease-in-out forwards;
+    padding: 5px 0;
+
+    &:hover {
+        transition: var(--transition);
+        &::before {
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            height: 2px;
+            background-color: var(--primary);
+            width: 100%;
+            animation: effect-forward-underline-link 0.3s ease-in-out forwards;
+        }
+        @keyframes effect-forward-underline-link {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        bottom: 0px;
+        height: 2px;
+        background-color: var(--primary);
+        width: 0;
+        animation: effect-backward-underline-link 0.3s ease-in-out forwards;
+    }
+
+    @keyframes effect-backward-underline-link {
+        from {
+            width: 100%;
+        }
+        to {
+            width: 0;
+        }
+    }
+
+}

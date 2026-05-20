@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///turbopack:///[project]/src/components/common/Input/CheckBoxInput.module.scss"],"sourcesContent":[".checkBox {\n    display: flex;\n    align-items: center;\n    gap: 5px;\n\n}\n\n.checkBox .formControlCheckbox {\n    accent-color: var(--primary);\n    cursor: pointer;\n    width: 16px;\n    height: 16px;\n}\n\n.checkBox label {\n    cursor: pointer;\n}"],"names":[],"mappings":"AAAA;;;;;;AAOA;;;;;;;AAOA"}}]
+}

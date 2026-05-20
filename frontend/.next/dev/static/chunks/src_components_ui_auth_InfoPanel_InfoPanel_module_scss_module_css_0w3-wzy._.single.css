@@ -1,0 +1,64 @@
+/* [project]/src/components/ui/auth/InfoPanel/InfoPanel.module.scss.module.css [app-client] (css) */
+.InfoPanel-module-scss-module__Ik2coa__panel {
+  flex-direction: column;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel {
+  color: #fff;
+  border-radius: var(--container-border-radius) 0 0 var(--container-border-radius);
+  background: linear-gradient(135deg, var(--primary), #01c8ff);
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel p {
+  max-width: 500px;
+  margin-top: 10px;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul {
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 40px;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul li {
+  align-items: center;
+  display: flex;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel ul li p {
+  margin: 0;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle {
+  background-color: #fff3;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  position: relative;
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle svg {
+  color: #fff;
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.InfoPanel-module-scss-module__Ik2coa__infoPanel .InfoPanel-module-scss-module__Ik2coa__iconCircle .InfoPanel-module-scss-module__Ik2coa__number {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/*# sourceMappingURL=src_components_ui_auth_InfoPanel_InfoPanel_module_scss_module_css_0w3-wzy._.single.css.map*/

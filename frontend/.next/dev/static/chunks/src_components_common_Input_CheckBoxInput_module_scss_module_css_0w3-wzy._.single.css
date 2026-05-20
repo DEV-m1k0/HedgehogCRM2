@@ -1,0 +1,19 @@
+/* [project]/src/components/common/Input/CheckBoxInput.module.scss.module.css [app-client] (css) */
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox {
+  align-items: center;
+  gap: 5px;
+  display: flex;
+}
+
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox .CheckBoxInput-module-scss-module__4QvF_a__formControlCheckbox {
+  accent-color: var(--primary);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.CheckBoxInput-module-scss-module__4QvF_a__checkBox label {
+  cursor: pointer;
+}
+
+/*# sourceMappingURL=src_components_common_Input_CheckBoxInput_module_scss_module_css_0w3-wzy._.single.css.map*/

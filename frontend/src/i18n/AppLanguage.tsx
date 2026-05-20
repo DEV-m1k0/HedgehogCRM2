@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export type AppLanguage = 'ru' | 'en';
@@ -12,6 +14,7 @@ const STORAGE_KEY = 'app_language';
 const AppLanguageContext = createContext<AppLanguageContextValue | null>(null);
 
 const getInitialLanguage = (): AppLanguage => {
+  if (typeof window === 'undefined') return 'ru';
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw === 'en') return 'en';
   return 'ru';

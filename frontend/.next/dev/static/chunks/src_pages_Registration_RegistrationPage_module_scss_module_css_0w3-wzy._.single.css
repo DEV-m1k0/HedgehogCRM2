@@ -1,0 +1,29 @@
+/* [project]/src/pages/Registration/RegistrationPage.module.scss.module.css [app-client] (css) */
+.RegistrationPage-module-scss-module__pzPfDq__container {
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.RegistrationPage-module-scss-module__pzPfDq__containerPanel {
+  border-radius: var(--container-border-radius);
+  transition: var(--transition);
+  box-shadow: var(--container-box-shadow-default);
+  display: flex;
+}
+
+.RegistrationPage-module-scss-module__pzPfDq__containerPanel:hover {
+  box-shadow: var(--container-box-shadow-hover);
+}
+
+.RegistrationPage-module-scss-module__pzPfDq__panel {
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  padding: 40px;
+  display: flex;
+}
+
+/*# sourceMappingURL=src_pages_Registration_RegistrationPage_module_scss_module_css_0w3-wzy._.single.css.map*/

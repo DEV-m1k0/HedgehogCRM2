@@ -1,0 +1,25 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.containerPanel {
+    display: flex;
+    border-radius: var(--container-border-radius);
+    transition: var(--transition);
+    box-shadow: var(--container-box-shadow-default);
+}
+.containerPanel:hover {
+    box-shadow: var(--container-box-shadow-hover);
+}
+
+.panel {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

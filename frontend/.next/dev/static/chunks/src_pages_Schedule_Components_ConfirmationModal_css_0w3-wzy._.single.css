@@ -1,0 +1,194 @@
+/* [project]/src/pages/Schedule/Components/ConfirmationModal.css [app-client] (css) */
+.modal-overlay {
+  z-index: 1000;
+  background-color: #00000080;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: .2s ease-out fadeIn;
+  display: flex;
+  position: fixed;
+  inset: 0;
+}
+
+.modal-container {
+  background: #fff;
+  border-radius: 12px;
+  flex-direction: column;
+  max-width: 100%;
+  max-height: 90vh;
+  animation: .3s ease-out slideUp;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 20px 60px #0000004d;
+}
+
+.modal-sm {
+  width: 400px;
+}
+
+.modal-md {
+  width: 500px;
+}
+
+.modal-lg {
+  width: 600px;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e7eb;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  display: flex;
+}
+
+.modal-title {
+  color: #111827;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  cursor: pointer;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  font-size: 28px;
+  line-height: 1;
+  transition: all .2s;
+  display: flex;
+}
+
+.modal-close-btn:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+.modal-content {
+  flex-grow: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.modal-message {
+  color: #374151;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.modal-children {
+  margin-top: 16px;
+}
+
+.modal-footer {
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  display: flex;
+}
+
+.modal-btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  min-width: 100px;
+  padding: 10px 24px;
+  font-size: .875rem;
+  font-weight: 500;
+  transition: all .2s;
+}
+
+.modal-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.modal-btn-cancel {
+  color: #374151;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+}
+
+.modal-btn-cancel:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.modal-btn-confirm {
+  color: #fff;
+}
+
+.modal-btn-primary {
+  background-color: #3b82f6;
+}
+
+.modal-btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.modal-btn-danger {
+  background-color: #ef4444;
+}
+
+.modal-btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.modal-btn-success {
+  background-color: #10b981;
+}
+
+.modal-btn-success:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-sm, .modal-md, .modal-lg {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal-btn {
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=src_pages_Schedule_Components_ConfirmationModal_css_0w3-wzy._.single.css.map*/

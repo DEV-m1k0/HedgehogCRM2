@@ -1,0 +1,3 @@
+{
+  "/(dashboard)/archive/[entity]/[entityId]/page": "app/(dashboard)/archive/[entity]/[entityId]/page.js"
+}

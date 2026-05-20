@@ -1,11 +1,11 @@
-// components/layout/Layout.tsx
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import styles from './styles/Layout.module.css';
 
-const Layout: React.FC = () => {
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -64,7 +64,7 @@ const Layout: React.FC = () => {
           ${isMobileMenuOpen ? styles.menuOpen : ''}
         `}>
           <div className={styles.content}>
-            <Outlet />
+            {children}
           </div>
         </main>
       </div>

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/antonknyazev/Desktop/HedgehogCRM2/frontend/src/app/loading.tsx"],"sourcesContent":["export default function Loading() {\n  return (\n    <div style={{\n      display: 'flex',\n      alignItems: 'center',\n      justifyContent: 'center',\n      height: '100vh',\n      fontFamily: 'system-ui, -apple-system, sans-serif',\n    }}>\n      <p style={{ color: '#64748b', fontSize: '1rem' }}>Загрузка...</p>\n    </div>\n  );\n}\n"],"names":["Loading","style","display","alignItems","justifyContent","height","fontFamily","color","fontSize"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBACE,8OAAC;QAAIC,OAAO;YACVC,SAAS;YACTC,YAAY;YACZC,gBAAgB;YAChBC,QAAQ;YACRC,YAAY;QACd;kBACE,cAAA,8OAAC;YAAEL,OAAO;gBAAEM,OAAO;gBAAWC,UAAU;YAAO;sBAAG;;;;;;;;;;;AAGxD"}}]
+}

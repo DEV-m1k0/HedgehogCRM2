@@ -1,0 +1,345 @@
+/* [project]/src/pages/Staff/StaffDirectoryPage.module.css [app-client] (css) */
+.StaffDirectoryPage-module__mB1o-G__page {
+  box-shadow: var(--container-box-shadow-default);
+  background: #fff;
+  border-radius: 12px;
+  gap: 14px;
+  padding: 20px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__header h1 {
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.StaffDirectoryPage-module__mB1o-G__header p {
+  color: var(--text-dark-mute);
+  margin: 6px 0 0;
+}
+
+.StaffDirectoryPage-module__mB1o-G__toolbar {
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__toolbarMeta {
+  align-items: center;
+  gap: 10px;
+  display: flex;
+}
+
+.StaffDirectoryPage-module__mB1o-G__toolbar input {
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #d5deea);
+  width: 100%;
+  font: inherit;
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__count {
+  color: var(--text-dark-mute);
+  font-size: 13px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__layoutSwitch {
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #d5deea);
+  background: color-mix(in srgb, var(--primary-mute) 16%, #fff);
+  border-radius: 10px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  display: inline-flex;
+}
+
+.StaffDirectoryPage-module__mB1o-G__layoutButton {
+  color: var(--text-dark-mute);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.StaffDirectoryPage-module__mB1o-G__layoutButton:hover {
+  background: color-mix(in srgb, var(--primary-mute) 26%, #fff);
+  color: var(--text-dark);
+}
+
+.StaffDirectoryPage-module__mB1o-G__layoutButtonActive {
+  color: color-mix(in srgb, var(--primary) 85%, var(--text-dark));
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary-shadow) 22%, #fff);
+  background: #fff;
+}
+
+.StaffDirectoryPage-module__mB1o-G__sections {
+  gap: 12px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__section {
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, #dce4ee);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__sectionHead {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  display: flex;
+}
+
+.StaffDirectoryPage-module__mB1o-G__sectionHead h2 {
+  color: var(--text-dark);
+  margin: 0;
+  font-size: 17px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__sectionHead span {
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, #c8d8ea);
+  background: color-mix(in srgb, var(--primary-mute) 28%, #fff);
+  color: color-mix(in srgb, var(--primary) 70%, var(--text-dark));
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.StaffDirectoryPage-module__mB1o-G__grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__gridList {
+  grid-template-columns: 1fr;
+}
+
+.StaffDirectoryPage-module__mB1o-G__card {
+  border: 1px solid color-mix(in srgb, var(--primary-mute) 54%, #dce5ef);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  border-radius: 10px;
+  gap: 10px;
+  padding: 10px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardList {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--primary-mute) 24%, #fff),
+    #fff 64%);
+  border-radius: 12px;
+  grid-template-columns: minmax(220px, 330px) minmax(300px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__cardTop {
+  min-width: 0;
+  padding-top: 0;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__meta {
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__meta div {
+  border: 1px solid color-mix(in srgb, var(--primary-mute) 56%, #e1e8f1);
+  background: #fff;
+  border-radius: 9px;
+  padding: 8px 10px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__contacts {
+  border-left: 1px solid color-mix(in srgb, var(--primary-mute) 50%, #e2e8f0);
+  place-content: flex-start flex-end;
+  align-self: center;
+  min-width: 0;
+  padding-left: 10px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__card:hover {
+  border-color: color-mix(in srgb, var(--primary) 28%, #c9d8ea);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary-shadow) 35%, #fff);
+  transform: translateY(-1px);
+}
+
+.StaffDirectoryPage-module__mB1o-G__card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, #5c7fa8);
+  outline-offset: 2px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardTop {
+  align-items: center;
+  gap: 10px;
+  display: flex;
+}
+
+.StaffDirectoryPage-module__mB1o-G__avatar {
+  background: var(--primary-gradient);
+  color: #fff;
+  border-radius: 999px;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-weight: 700;
+  display: grid;
+  overflow: hidden;
+}
+
+.StaffDirectoryPage-module__mB1o-G__avatar img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardTop h3 {
+  color: var(--text-dark);
+  margin: 0;
+  font-size: 14px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__cardTop p {
+  color: var(--text-dark-mute);
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__meta {
+  gap: 7px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__meta div {
+  gap: 2px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__meta dt {
+  color: var(--text-dark-mute);
+  font-size: 11px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__meta dd {
+  color: var(--text-dark);
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 13px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__contacts {
+  flex-wrap: wrap;
+  gap: 6px;
+  display: flex;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialIconLink {
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, #d0dcea);
+  width: 34px;
+  height: 34px;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  background: #fff;
+  border-radius: 10px;
+  place-items: center;
+  text-decoration: none;
+  display: inline-grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialIconLink:hover {
+  box-shadow: 0 8px 14px color-mix(in srgb, var(--primary-shadow) 32%, #fff);
+  border-color: color-mix(in srgb, var(--primary) 36%, #b8cce2);
+  transform: translateY(-1px);
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialIconBadge {
+  color: #fff;
+  border-radius: 7px;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  display: grid;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialIconBadge svg, .StaffDirectoryPage-module__mB1o-G__socialIconBadge img {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialIconBadge img {
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialVk .StaffDirectoryPage-module__mB1o-G__socialIconBadge {
+  background: #2787f5;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialTelegram .StaffDirectoryPage-module__mB1o-G__socialIconBadge {
+  background: #2aabee;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialWhatsapp .StaffDirectoryPage-module__mB1o-G__socialIconBadge {
+  background: #25d366;
+}
+
+.StaffDirectoryPage-module__mB1o-G__socialMax .StaffDirectoryPage-module__mB1o-G__socialIconBadge {
+  color: #111827;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+.StaffDirectoryPage-module__mB1o-G__empty, .StaffDirectoryPage-module__mB1o-G__state {
+  color: var(--text-dark-mute);
+  margin: 0;
+}
+
+@media (max-width: 740px) {
+  .StaffDirectoryPage-module__mB1o-G__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__toolbarMeta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__layoutSwitch {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__layoutButton {
+    text-align: center;
+    flex: 1;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__cardList {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .StaffDirectoryPage-module__mB1o-G__cardList .StaffDirectoryPage-module__mB1o-G__contacts {
+    border-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--primary-mute) 50%, #e2e8f0);
+    justify-content: flex-start;
+    padding-top: 10px;
+    padding-left: 0;
+  }
+}
+
+/*# sourceMappingURL=src_pages_Staff_StaffDirectoryPage_module_0bn8n.6.css.map*/

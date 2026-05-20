@@ -1,0 +1,17 @@
+.checkBox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+}
+
+.checkBox .formControlCheckbox {
+    accent-color: var(--primary);
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.checkBox label {
+    cursor: pointer;
+}

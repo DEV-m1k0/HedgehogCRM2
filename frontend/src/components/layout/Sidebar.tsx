@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   BarChart3,
   Calendar,
@@ -17,10 +20,10 @@ import {
   Shield,
 } from 'lucide-react';
 import styles from './styles/Sidebar.module.css';
-import type { MenuItem } from '../../types/layout.types';
-import type { UserType } from '../../types/User.types';
-import { authApi } from '../../api/crm';
-import { useAppLanguage } from '../../i18n/AppLanguage';
+import type { MenuItem } from '@/types/layout.types';
+import type { UserType } from '@/types/User.types';
+import { authApi } from '@/lib/api/crm';
+import { useAppLanguage } from '@/i18n/AppLanguage';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -45,7 +48,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState<UserType>(emptyUser);
-  const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = usePathname();
   const { language } = useAppLanguage();
   const isEn = language === 'en';
 
@@ -161,51 +165,58 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
 
         <nav className={styles.nav}>
           <ul className={styles.menu}>
-            {menuItems.map((item) => (
-              <li key={item.id} className={styles.menuItem} data-tooltip={isCollapsed ? item.label : undefined}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ''}`}
-                  onClick={(e) => {
-                    handleLinkClick();
-                    if (item.submenu && !isCollapsed) {
-                      e.preventDefault();
-                      toggleSubmenu(item.id);
-                    }
-                  }}
-                >
-                  <span className={styles.icon}>{item.icon}</span>
-                  {!isCollapsed && (
-                    <>
+            {menuItems.map((item) => {
+              const isActive = item.path === '/' ? pathname === '/' : pathname === item.path || (pathname?.startsWith(item.path + '/') ?? false);
+              return (
+                <li key={item.id} className={styles.menuItem} data-tooltip={isCollapsed ? item.label : undefined}>
+                  {item.submenu && !isCollapsed ? (
+                    <button
+                      type="button"
+                      className={`${styles.menuLink} ${isActive ? styles.active : ''}`}
+                      onClick={() => {
+                        toggleSubmenu(item.id);
+                      }}
+                    >
+                      <span className={styles.icon}>{item.icon}</span>
                       <span className={styles.label}>{item.label}</span>
-                      {item.submenu && (
-                        <ChevronDown
-                          size={16}
-                          className={styles.chevron}
-                          style={{ transform: openSubmenus[item.id] ? 'rotate(180deg)' : 'none' }}
-                        />
-                      )}
-                    </>
+                      <ChevronDown
+                        size={16}
+                        className={styles.chevron}
+                        style={{ transform: openSubmenus[item.id] ? 'rotate(180deg)' : 'none' }}
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.path}
+                      className={`${styles.menuLink} ${isActive ? styles.active : ''}`}
+                      onClick={handleLinkClick}
+                    >
+                      <span className={styles.icon}>{item.icon}</span>
+                      {!isCollapsed && <span className={styles.label}>{item.label}</span>}
+                    </Link>
                   )}
-                </NavLink>
 
-                {!isCollapsed && item.submenu && openSubmenus[item.id] && (
-                  <ul className={styles.submenu}>
-                    {item.submenu.map((subItem) => (
-                      <li key={subItem.id}>
-                        <NavLink
-                          to={subItem.path}
-                          className={({ isActive }) => `${styles.submenuLink} ${isActive ? styles.active : ''}`}
-                          onClick={handleLinkClick}
-                        >
-                          {subItem.label}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
+                  {!isCollapsed && item.submenu && openSubmenus[item.id] && (
+                    <ul className={styles.submenu}>
+                      {item.submenu.map((subItem) => {
+                        const subIsActive = pathname === subItem.path;
+                        return (
+                          <li key={subItem.id}>
+                            <Link
+                              href={subItem.path}
+                              className={`${styles.submenuLink} ${subIsActive ? styles.active : ''}`}
+                              onClick={handleLinkClick}
+                            >
+                              {subItem.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
@@ -215,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
               type="button"
               className={styles.userCard}
               onClick={() => {
-                navigate('/account');
+                router.push('/account');
                 handleLinkClick();
               }}
             >

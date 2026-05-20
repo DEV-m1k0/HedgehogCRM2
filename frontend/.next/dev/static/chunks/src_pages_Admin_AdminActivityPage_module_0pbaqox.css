@@ -1,0 +1,119 @@
+/* [project]/src/pages/Admin/AdminActivityPage.module.css [app-client] (css) */
+.AdminActivityPage-module__2YtfQa__page {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px #0000001a;
+}
+
+.AdminActivityPage-module__2YtfQa__header {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  display: flex;
+}
+
+.AdminActivityPage-module__2YtfQa__header h1 {
+  margin: 0 0 4px;
+}
+
+.AdminActivityPage-module__2YtfQa__header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.AdminActivityPage-module__2YtfQa__filters {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+  display: grid;
+}
+
+.AdminActivityPage-module__2YtfQa__input, .AdminActivityPage-module__2YtfQa__select, .AdminActivityPage-module__2YtfQa__refreshBtn, .AdminActivityPage-module__2YtfQa__dangerBtn, .AdminActivityPage-module__2YtfQa__secondaryBtn {
+  font: inherit;
+  border: 1px solid #d6d9df;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.AdminActivityPage-module__2YtfQa__refreshBtn, .AdminActivityPage-module__2YtfQa__dangerBtn, .AdminActivityPage-module__2YtfQa__secondaryBtn {
+  cursor: pointer;
+}
+
+.AdminActivityPage-module__2YtfQa__dangerBtn {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.AdminActivityPage-module__2YtfQa__secondaryBtn {
+  background: #f1f5f9;
+}
+
+.AdminActivityPage-module__2YtfQa__stats {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+  display: grid;
+}
+
+.AdminActivityPage-module__2YtfQa__statCard {
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  gap: 4px;
+  padding: 10px;
+  display: grid;
+}
+
+.AdminActivityPage-module__2YtfQa__statCard span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.AdminActivityPage-module__2YtfQa__panel {
+  margin-top: 16px;
+}
+
+.AdminActivityPage-module__2YtfQa__panel h2 {
+  margin: 0 0 8px;
+}
+
+.AdminActivityPage-module__2YtfQa__tableWrap {
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.AdminActivityPage-module__2YtfQa__table {
+  border-collapse: collapse;
+  background: #fff;
+  width: 100%;
+  min-width: 1080px;
+}
+
+.AdminActivityPage-module__2YtfQa__table th, .AdminActivityPage-module__2YtfQa__table td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #eef2f7;
+  padding: 10px;
+}
+
+.AdminActivityPage-module__2YtfQa__table th {
+  color: #334155;
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.AdminActivityPage-module__2YtfQa__ellipsis {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.AdminActivityPage-module__2YtfQa__loading {
+  color: #64748b;
+}
+
+/*# sourceMappingURL=src_pages_Admin_AdminActivityPage_module_0pbaqox.css.map*/

@@ -1,0 +1,118 @@
+/* [project]/src/components/ui/auth/FormPanel/FormPanel.module.scss.module.css [app-client] (css) */
+.FormPanel-module-scss-module__YuU07G__panel {
+  flex-direction: column;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel {
+  border-radius: 0 var(--container-border-radius) var(--container-border-radius) 0;
+  background-color: #fff;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel label {
+  color: var(--text-dark);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel h1 {
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel p {
+  color: var(--text-dark-mute);
+  margin-top: 10px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel form {
+  margin-top: 40px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__tripleInput {
+  gap: 10px;
+  display: flex;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__tripleInput input {
+  padding-left: 16px;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__loginButton {
+  background: var(--primary-gradient);
+  color: #fff;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+  border: none;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-radius: 15px !important;
+  padding: 15px 0 !important;
+}
+
+.FormPanel-module-scss-module__YuU07G__formPanel .FormPanel-module-scss-module__YuU07G__loginButton:hover {
+  transform: scale(1.03);
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage {
+  text-align: center;
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a {
+  color: var(--primary);
+  padding: 5px 0;
+  font-weight: 600;
+  text-decoration: none;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-backward-underline-link;
+  position: relative;
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:hover {
+  transition: var(--transition);
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:hover:before {
+  content: "";
+  background-color: var(--primary);
+  width: 100%;
+  height: 2px;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-forward-underline-link;
+  position: absolute;
+  bottom: 0;
+}
+
+@keyframes FormPanel-module-scss-module__YuU07G__effect-forward-underline-link {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.FormPanel-module-scss-module__YuU07G__switchPage a:before {
+  content: "";
+  background-color: var(--primary);
+  width: 0;
+  height: 2px;
+  animation: .3s ease-in-out forwards FormPanel-module-scss-module__YuU07G__effect-backward-underline-link;
+  position: absolute;
+  bottom: 0;
+}
+
+@keyframes FormPanel-module-scss-module__YuU07G__effect-backward-underline-link {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0;
+  }
+}
+
+/*# sourceMappingURL=src_components_ui_auth_FormPanel_FormPanel_module_scss_module_css_0w3-wzy._.single.css.map*/
