@@ -581,7 +581,7 @@ http://localhost/docs
 Рекомендуемый способ запуска приложения — Docker Compose.
 
 ```bash
-docker compose up --build
+docker-compose up -d --build
 ```
 
 После запуска приложение доступно по адресу:
@@ -670,12 +670,9 @@ http://localhost:3000
 
 ## Демонстрационные данные
 
-Для заполнения базы данных тестовыми сущностями используется скрипт:
+При запуске через Docker Compose backend автоматически проверяет состояние базы данных. Если основные таблицы приложения пустые, выполняется скрипт:
 
-```bash
-cd backend
-PYTHONPATH=. python create_initial_database.py
-```
+`backend/create_initial_database.py`
 
 Скрипт создает:
 

@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Home,
   LogOut,
-  Mail,
   Settings,
   UserCircle2,
   Users,
@@ -133,18 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, isMobileOpen, onCloseMob
       { id: 'calendar', label: isEn ? 'Calendar' : 'Календарь', icon: <Calendar size={20} />, path: '/calendar' },
       { id: 'analytics', label: isEn ? 'Analytics' : 'Аналитика', icon: <BarChart3 size={20} />, path: '/analytics' },
       { id: 'archive', label: isEn ? 'Archive' : 'Архив', icon: <ArchiveRestore size={20} />, path: '/archive' },
-      ...(isAdmin ? [{ id: 'admin-activity', label: isEn ? 'Admin Activity' : 'Активность админа', icon: <Shield size={20} />, path: '/admin/activity' }] : []),
-      {
-        id: 'messages',
-        label: isEn ? 'Messages' : 'Сообщения',
-        icon: <Mail size={20} />,
-        path: '/messages/inbox',
-        submenu: [
-          { id: 'inbox', label: isEn ? 'Inbox' : 'Входящие', icon: <Mail size={16} />, path: '/messages/inbox' },
-          { id: 'sent', label: isEn ? 'Sent' : 'Отправленные', icon: <Mail size={16} />, path: '/messages/sent' },
-          { id: 'drafts', label: isEn ? 'Drafts' : 'Черновики', icon: <Mail size={16} />, path: '/messages/drafts' },
-        ],
-      },
+      ...(isAdmin ? [{ id: 'admin-activity', label: isEn ? 'Users Activity' : 'Активность пользователей', icon: <Shield size={20} />, path: '/admin/activity' }] : []),
       { id: 'account', label: isEn ? 'Profile' : 'Профиль', icon: <UserCircle2 size={20} />, path: '/account' },
       { id: 'settings', label: isEn ? 'Settings' : 'Настройки', icon: <Settings size={20} />, path: '/settings' },
     ];

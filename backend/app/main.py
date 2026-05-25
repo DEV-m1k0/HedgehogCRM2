@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.api.router import api_router
 from app.db import SessionLocal, engine
 from app.logging_setup import setup_logging
-from app.models import AuditLog, Base, Role, UserSession
+from app.models import AuditLog, Base, Role, User, UserSession
 from app.security import decode_token
 from app.services.lesson_reminders import start_lesson_reminder_worker, stop_lesson_reminder_worker
 
@@ -161,6 +161,20 @@ def _ensure_makeup_groups_schema() -> None:
             connection.execute(text("ALTER TABLE groups ADD COLUMN makeup_session_at DATETIME"))
 
 
+def _seed_demo_data_if_empty() -> None:
+    db: Session = SessionLocal()
+    try:
+        user_count = db.query(User).count()
+        if user_count == 0:
+            logging.getLogger("hedgehog.api").info("Empty database detected — seeding demo data...")
+            db.close()
+            from create_initial_database import main as seed_data
+            seed_data()
+            return
+    finally:
+        db.close()
+
+
 def create_app() -> FastAPI:
     setup_logging()
     logger = logging.getLogger("hedgehog.api")
@@ -186,6 +200,7 @@ def create_app() -> FastAPI:
         _ensure_attendance_schema()
         _ensure_makeup_groups_schema()
         _seed_roles()
+        _seed_demo_data_if_empty()
         start_lesson_reminder_worker(SessionLocal)
         logger.info("Application startup completed")
 

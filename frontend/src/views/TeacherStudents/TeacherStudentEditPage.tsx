@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { clientsApi } from '@/lib/api/crm';
 import { useNotifications } from '@/components/feedback/Notifications';
 import { useConfirmDialog } from '@/components/feedback/ConfirmDialog';
@@ -23,11 +23,17 @@ export const TeacherStudentEditPage = () => {
   const { notify } = useNotifications();
   const { confirm } = useConfirmDialog();
   const router = useRouter();
+  const pathname = usePathname();
   const { clientId } = useParams() as { clientId: string };
 
   const currentUser = getCurrentUser();
   const roleName = currentUser?.role?.name?.toLowerCase() ?? '';
   const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
+  const isManager = roleName.includes('менеджер') || roleName.includes('manager');
+  const isAdmin = roleName.includes('администратор') || roleName.includes('admin');
+  const canEditClient = isTeacher || isManager || isAdmin;
+  const backListPath = isTeacher ? '/my-students' : '/clients';
+  const isClientsEditRoute = pathname?.startsWith('/clients/');
 
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -62,10 +68,16 @@ export const TeacherStudentEditPage = () => {
   }, [clientId]);
 
   useEffect(() => {
-    if (!isTeacher) router.replace('/');
-  }, [isTeacher, router]);
+    if (!canEditClient) {
+      router.replace('/');
+      return;
+    }
+    if (isTeacher && isClientsEditRoute) {
+      router.replace(`/my-students/${clientId}/edit`);
+    }
+  }, [canEditClient, clientId, isClientsEditRoute, isTeacher, router]);
 
-  if (!isTeacher) return null;
+  if (!canEditClient || (isTeacher && isClientsEditRoute)) return null;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -99,7 +111,7 @@ export const TeacherStudentEditPage = () => {
     try {
       await clientsApi.remove(Number(clientId));
       notify('info', 'Ученик архивирован', 'Ученик убран из активного списка.', { href: '/archive' });
-      router.push('/my-students');
+      router.push(backListPath);
     } catch {
       notify('error', 'Ошибка', 'Не удалось архивировать ученика.');
     }

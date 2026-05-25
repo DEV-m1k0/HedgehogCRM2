@@ -29,7 +29,8 @@ services:
       JWT_REFRESH_DAYS: "14"
       JWT_COOKIE_SECURE: "false"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     volumes:
       - backend_media:/app/media
     ports:
@@ -44,7 +45,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: ""
+      NEXT_PUBLIC_API_URL: "/api"
     ports:
       - "3000:3000"
     depends_on:

@@ -124,6 +124,9 @@ export const ClientDetailsPage = () => {
   const currentUser = getCurrentUser();
   const roleName = currentUser?.role?.name?.toLowerCase() ?? '';
   const isTeacher = roleName.includes('преподаватель') || roleName.includes('teacher');
+  const isManager = roleName.includes('менеджер') || roleName.includes('manager');
+  const isAdmin = roleName.includes('администратор') || roleName.includes('admin');
+  const canEditClient = isTeacher || isManager || isAdmin;
 
   const [client, setClient] = useState<Client | null>(null);
   const [stats, setStats] = useState<StudentAttendanceStats | null>(null);
@@ -212,8 +215,8 @@ export const ClientDetailsPage = () => {
         </div>
         <div className={styles.heroActions}>
           <button type="button" className={styles.ghostBtn} onClick={handleBack}>Назад</button>
-          {isTeacher && (
-            <Link href={`/my-students/${client.id}/edit`} className={styles.primaryBtn}>
+          {canEditClient && (
+            <Link href={isTeacher ? `/my-students/${client.id}/edit` : `/clients/${client.id}/edit`} className={styles.primaryBtn}>
               Редактировать
             </Link>
           )}
